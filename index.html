@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGL</title>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 vPositionAttr;
+      attribute vec4 vColorAttr;
+
+      varying lowp vec4 vColorVar;
+
+      void main() {
+        gl_Position = vPositionAttr;
+        vColorVar = vColorAttr;
+      }
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      varying lowp vec4 vColorVar;
+
+      void main() {
+        gl_FragColor = vColorVar;
+      }
+    </script>
+    <script src="index.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <canvas id="canvas" width="512" height="512">
+      HTML5 canvas not supported in your browser.
+    </canvas>
+  </body>
+</html>
