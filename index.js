@@ -76,7 +76,7 @@ window.onload = function() {
   ];
   var positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
   // Associate shader position variable with data buffer
   var vPositionAttr = gl.getAttribLocation(program, "vPositionAttr");
@@ -85,19 +85,59 @@ window.onload = function() {
 
   // Bind color buffer
   const colors = [
-    1.0,  0.0,  0.0,  1.0,
-    0.0,  1.0,  0.0,  1.0,
-    0.0,  0.0,  1.0,  1.0,
-    1.0,  1.0,  1.0,  1.0,
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0,
   ];
   const colorBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
 
   // Associate shader color variable with data buffer
   var vColorAttr = gl.getAttribLocation(program, "vColorAttr");
   gl.vertexAttribPointer(vColorAttr, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vColorAttr);
+
+  // Set event listener
+  var draggedVertexID = -1;
+
+  function mouseDownHandler(e) {
+    // Select vertex (check from topmost vertex)
+    const mGlCoord = getMouseGlCoordinate(e);
+    for (var i = vertices.length - 2; i >= 0 ; i -= 2) {
+      if (vertexInRange(mGlCoord, { x: vertices[i], y: vertices[i+1] })) {
+        draggedVertexID = i;
+        return;
+      }
+    }
+  }
+
+  function mouseUpHandler(e) {
+    draggedVertexID = -1;
+  }
+
+  function mouseOutHandler(e) {
+    draggedVertexID = -1;
+  }
+
+  function mouseMoveHandler(e) {
+    if (draggedVertexID != -1) {
+      const mGlCoord = getMouseGlCoordinate(e);
+      // Vertex data
+      vertices[draggedVertexID] = mGlCoord.x;
+      vertices[draggedVertexID+1] = mGlCoord.y;
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+      // Render image
+      render();
+    }
+  }
+
+  canvas.addEventListener("mousedown", mouseDownHandler, false);
+  canvas.addEventListener("mouseup", mouseUpHandler, false);
+  canvas.addEventListener("mouseout", mouseOutHandler, false);
+  canvas.addEventListener("mousemove", mouseMoveHandler, false);
 
   // Render image
   render();
@@ -106,4 +146,34 @@ window.onload = function() {
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+// Helper functions
+function getMouseGlCoordinate(e) {
+  // Get mouse coordinate relative to canvas
+  // Assumption: canvas.height == canvas.clientHeight and canvas.width == canvas.clientWidth
+  const rect = canvas.getBoundingClientRect();
+  posX = e.clientX - rect.left;
+  posY = e.clientY - rect.top;
+  // Convert to webgl coordinate
+  glX = posX / gl.canvas.width * 2 - 1;
+  glY = posY / gl.canvas.height * (-2) + 1;
+  // Return
+  return {
+    x: glX,
+    y: glY
+  };
+}
+
+function vertexInRange(mGlCoord, vGlCoord) {
+  // Create vertex area lower and upper bound
+  lowerX = (vGlCoord.x > -0.9) ? (vGlCoord.x - 0.1) : (-1.0);
+  lowerY = (vGlCoord.y > -0.9) ? (vGlCoord.y - 0.1) : (-1.0);
+  upperX = (vGlCoord.x < 0.9) ? (vGlCoord.x + 0.1) : (1.0);
+  upperY = (vGlCoord.y < 0.9) ? (vGlCoord.y + 0.1) : (1.0);
+  // Return true if mouse inside vertex area, otherwise false
+  return (
+    lowerX < mGlCoord.x && mGlCoord.x < upperX &&
+    lowerY < mGlCoord.y && mGlCoord.y < upperY
+  );
 }
