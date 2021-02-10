@@ -18,17 +18,9 @@ window.onload = function() {
   // Create program
   program = gl.createProgram();
 
-  // Create vertex shader
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  vertexShaderSource = document.getElementById("vertex-shader").text;
-
-  gl.shaderSource(vertexShader, vertexShaderSource);
-  gl.compileShader(vertexShader);
-
-  if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-    alert("Failed to compile vertex shader");
-  }
-
+  // Load vertex shader
+  const vertexShaderSource = document.getElementById("vertex-shader").text;
+  const vertexShader = getShader(gl.VERTEX_SHADER, vertexShaderSource);
   // Attach vertex shader
   gl.attachShader(program, vertexShader);
   console.log(
@@ -36,17 +28,9 @@ window.onload = function() {
     gl.getProgramParameter(program, gl.ATTACHED_SHADERS)
   );
 
-  // Create fragment shader
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+  // Load fragment shader
   fragmentShaderSource = document.getElementById("fragment-shader").text;
-
-  gl.shaderSource(fragmentShader, fragmentShaderSource);
-  gl.compileShader(fragmentShader);
-
-  if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-    alert("Failed to compile fragment shader");
-  }
-
+  const fragmentShader = getShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
   // Attach fragment shader
   gl.attachShader(program, fragmentShader);
   console.log(
@@ -59,9 +43,6 @@ window.onload = function() {
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     alert("Failed to link program");
-    console.log(gl.getShaderInfoLog(vertexShader))
-    console.log(gl.getShaderInfoLog(fragmentShader))
-    console.log(gl.getProgramInfoLog(program))
   }
 
   // Use program
@@ -152,6 +133,19 @@ window.onload = function() {
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+function getShader(type, source) {
+  const shader = gl.createShader(type);
+
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    alert("Failed to compile fragment shader");
+    return null;
+  }
+  return shader;
 }
 
 // Helper functions
