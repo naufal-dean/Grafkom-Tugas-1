@@ -80,7 +80,7 @@ window.onload = function() {
   gl.vertexAttribPointer(vColorAttr, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vColorAttr);
 
-  // Set event listener
+  // Set canvas event listener
   var selectedVertexOffset = -1;
   var draggedVertexOffset = -1;
   var dragged = false;
@@ -125,6 +125,15 @@ window.onload = function() {
   canvas.addEventListener("mouseup", mouseUpHandler, false);
   canvas.addEventListener("mouseout", mouseOutHandler, false);
   canvas.addEventListener("mousemove", mouseMoveHandler, false);
+
+  // Set other listeners
+  savebtn = document.getElementById("savebtn");
+
+  function savebtnClickedHandler(e) {
+    saveModel(vertices, colors);
+  }
+
+  savebtn.addEventListener("click", savebtnClickedHandler, false);
 
   // Render image
   render();
