@@ -100,39 +100,45 @@ window.onload = function() {
   gl.enableVertexAttribArray(vColorAttr);
 
   // Set event listener
-  var draggedVertexID = -1;
+  var selectedVertexOffset = -1;
+  var draggedVertexOffset = -1;
+  var dragged = false;
 
-  function mouseDownHandler(e) {
-    // Select vertex (check from topmost vertex)
-    const mGlCoord = getMouseGlCoordinate(e);
-    for (var i = vertices.length - 2; i >= 0 ; i -= 2) {
-      if (vertexInRange(mGlCoord, { x: vertices[i], y: vertices[i+1] })) {
-        draggedVertexID = i;
-        return;
-      }
+  function clickHandler(e) {
+    if (!dragged) {
+      selectedVertexOffset = getVertexOffset(e, vertices);
+    } else {
+      dragged = false;
     }
   }
 
+  function mouseDownHandler(e) {
+    draggedVertexOffset = getVertexOffset(e, vertices);
+  }
+
   function mouseUpHandler(e) {
-    draggedVertexID = -1;
+    draggedVertexOffset = -1;
   }
 
   function mouseOutHandler(e) {
-    draggedVertexID = -1;
+    draggedVertexOffset = -1;
   }
 
   function mouseMoveHandler(e) {
-    if (draggedVertexID != -1) {
+    if (draggedVertexOffset != -1) {
+      dragged = true;
+      // Update vertex data
       const mGlCoord = getMouseGlCoordinate(e);
-      // Vertex data
-      vertices[draggedVertexID] = mGlCoord.x;
-      vertices[draggedVertexID+1] = mGlCoord.y;
+      vertices[draggedVertexOffset] = mGlCoord.x;
+      vertices[draggedVertexOffset+1] = mGlCoord.y;
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
       // Render image
       render();
     }
   }
+
+  canvas.addEventListener("click", clickHandler, false);
 
   canvas.addEventListener("mousedown", mouseDownHandler, false);
   canvas.addEventListener("mouseup", mouseUpHandler, false);
@@ -163,6 +169,18 @@ function getMouseGlCoordinate(e) {
     x: glX,
     y: glY
   };
+}
+
+function getVertexOffset(e, vertices) {
+  // Select vertex (check from topmost vertex)
+  const mGlCoord = getMouseGlCoordinate(e);
+  for (var i = vertices.length - 2; i >= 0 ; i -= 2) {
+    if (vertexInRange(mGlCoord, { x: vertices[i], y: vertices[i+1] })) {
+      return i;
+    }
+  }
+  // Return -1 if no vertex in mouse range
+  return -1;
 }
 
 function vertexInRange(mGlCoord, vGlCoord) {
