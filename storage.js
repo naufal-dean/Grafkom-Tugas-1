@@ -7,8 +7,7 @@ function saveModels(models) {
   data += models.length + "\n";
   // Packed models representation
   models.forEach(function(model) {
-    const packed = packModel(model);
-    data += packed;
+    data += model.pack();
   });
 
   // Create a tag with download attribute
@@ -41,60 +40,32 @@ function loadModels(filesInputId, resultCallback) {
   const reader = new FileReader();
   reader.onload = (function(f) {
     return function(e) {
-      unpacked = unpackModel(e.target.result);
-      resultCallback(unpacked);
+      const data = e.target.result;
+
+      // Split data, and filter empty string
+      const lines = data.split("\n").filter(line => line);
+
+      // Get model count
+      const modelCount = parseInt(lines[0]);
+
+      // Unpack models
+      var models = [];
+      var offset = 1;  // current lines index offset
+      for (var i = 0; i < modelCount; i++) {
+        // Get line count for next model representation
+        const lineCount = parseInt(lines[offset]);
+        // Unpack model
+        var model = new Model();
+        model.unpack(lines.slice(offset, offset + lineCount));
+        models.push(model);
+        // Update offset
+        offset += lineCount;
+      }
+
+      // Return result to main program
+      resultCallback(models);
     };
   })(file);
   // Read file
   reader.readAsText(file);
-}
-
-// Helper function to pack model to string, vice versa
-function packModel(model) {
-  var res = ""
-  // Data len
-  res += model.vertexCount + "\n";
-  // Datas
-  for (var i = 0; i < model.vertexCount; i++) {
-    const i2 = i * 2;
-    res += model.vertices[i2] + " " + model.vertices[i2 + 1] + "\n";
-  }
-  for (var i = 0; i < model.vertexCount; i++) {
-    const i4 = i * 4;
-    const colors = model.colors;
-    res += colors[i4] + " " + colors[i4 + 1] + " " + colors[i4 + 2] + " " + colors[i4 + 3] + "\n";
-  }
-  // Return
-  return res;
-}
-
-function unpackModel(data) {
-  // Read data, and filter empty string
-  const lines = data.split("\n").filter(line => line);
-  // Get data len
-  const vertexCount = parseInt(lines[0])
-  // Read vertice data
-  var vertices = [];
-  for (var i = 1; i < 1 + vertexCount; i++) {
-    // Parse coordinates from data line
-    const coord = lines[i].split(" ");
-    if (coord.length != 2) {
-      alert("Malformed input data");
-      return null;
-    }
-    vertices.push(parseFloat(coord[0]), parseFloat(coord[1]));
-  }
-  // Read color data
-  var colors = [];
-  for (var i = 1 + vertexCount; i < 1 + (vertexCount * 2); i++) {
-    // Parse coordinates from data line
-    const rgba = lines[i].split(" ");
-    if (rgba.length != 4) {
-      alert("Malformed input data");
-      return null;
-    }
-    colors.push(parseFloat(rgba[0]), parseFloat(rgba[1]), parseFloat(rgba[2]), parseFloat(rgba[3]));
-  }
-  // Return
-  return [vertices, colors, vertexCount];
 }

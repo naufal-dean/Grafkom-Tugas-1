@@ -66,9 +66,6 @@ window.onload = function() {
   gl.vertexAttribPointer(vColorAttr, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vColorAttr);
 
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(models[0].drawMode, 0, models[0].vertexCount);
-
 
   // Set canvas event listener
   var selectedModel = null;
@@ -82,7 +79,7 @@ window.onload = function() {
       if (document.getElementById("add-point").checked) {
         // add new point to polygon
         const mGlCoord = getMouseGlCoordinate(gl, e);
-        addVertex(mGlCoord.x, mGlCoord.y);
+        // addVertex(mGlCoord.x, mGlCoord.y);
       } else {
         // select vertex
         [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
@@ -129,20 +126,18 @@ window.onload = function() {
 
   // Set load button listener
   document.getElementById("loadbtn").addEventListener("click", function(e) {
-    loadModels("loadfile", function(unpacked) {
-      [vertices, colors, vertexCount] = unpacked;
-      setPositionBufferData(draggedModel);
-      setColorBufferData(draggedModel);
+    loadModels("loadfile", function(loadedModels) {
+      models = loadedModels;
     });
   }, false);
 
   // Modify vertex and color helpers
-  function addVertex(x, y) {
+  function addVertex(model, x, y) {
     vertexCount++;
     vertices.push(x, y);
     colors.push(...DEFAULT_VERTEX_COLOR) // Use default vertex color
-    setPositionBufferData(draggedModel);
-    setColorBufferData(draggedModel);
+    setPositionBufferData(model);
+    setColorBufferData(model);
   }
 
   // Render helpers
