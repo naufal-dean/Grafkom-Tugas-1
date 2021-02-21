@@ -121,13 +121,13 @@ window.onload = function() {
 
   // Set save button listener
   document.getElementById("savebtn").addEventListener("click", function(e) {
-    saveModel(vertices, colors);
+    saveModel(vertices, colors, vertexCount);
   }, false);
 
   // Set load button listener
   document.getElementById("loadbtn").addEventListener("click", function(e) {
     loadModel("loadfile", function(unpacked) {
-      [vertices, colors] = unpacked;
+      [vertices, colors, vertexCount] = unpacked;
       setPositionBufferData();
       setColorBufferData();
     });
