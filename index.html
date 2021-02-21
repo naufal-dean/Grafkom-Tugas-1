@@ -27,14 +27,19 @@
     <script src="index.js" type="text/javascript" charset="utf-8"></script>
   </head>
   <body>
+    <!-- The canvas -->
     <canvas id="canvas" width="512" height="512">
       HTML5 canvas not supported in your browser.
     </canvas>
+    <br /><br />
+    <!-- Input model radio button -->
+    <p>Select input:</p>
+    <input type="radio" name="model-input" value="none" checked><span>None</span><br />
+    <input type="radio" name="model-input" value="line"><span>Line</span><br />
+    <input type="radio" name="model-input" value="square"><span>Square</span><br />
+    <input type="radio" name="model-input" value="polygon"><span>Polygon</span><br />
     <br />
-    <br />
-    <input type="checkbox" id="add-point"><span>Add Point</span>
-    <br />
-    <br />
+    <!-- Save and load button -->
     <button id="savebtn" type="button" name="savebtn">Save Model</button><br />
     <input id="loadfile" type="file" /><br />
     <button id="loadbtn" type="button" name="loadbtn">Load Model</button><br />

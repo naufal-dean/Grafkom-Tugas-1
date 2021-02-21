@@ -1,5 +1,10 @@
 "use strict";
 
+const MODEL_INPUT_NONE = "none";
+const MODEL_INPUT_LINE = "line";
+const MODEL_INPUT_SQUARE = "square";
+const MODEL_INPUT_POLYGON = "polygon";
+
 window.onload = function() {
   // Get canvas
   const canvas = document.getElementById("canvas");
@@ -118,6 +123,15 @@ window.onload = function() {
   canvas.addEventListener("mouseup", mouseUpHandler, false);
   canvas.addEventListener("mouseout", mouseOutHandler, false);
   canvas.addEventListener("mousemove", mouseMoveHandler, false);
+
+  // Set model input radio listener
+  const modelInputRadio = document.getElementsByName("model-input");
+  for (var i = 0; i < modelInputRadio.length; i++) {
+    modelInputRadio[i].addEventListener("change", function() {
+      if (this.value !== modelInput)
+        modelInput = this.value;
+    }, false);
+  }
 
   // Set save button listener
   document.getElementById("savebtn").addEventListener("click", function(e) {
