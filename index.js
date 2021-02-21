@@ -1,3 +1,5 @@
+"use strict";
+
 var gl;
 var program;
 
@@ -9,7 +11,7 @@ window.onload = function() {
   var colors = [];
 
   // Get canvas
-  canvas = document.getElementById("canvas");
+  const canvas = document.getElementById("canvas");
 
   // Get webgl context
   gl = canvas.getContext("webgl");
@@ -35,7 +37,7 @@ window.onload = function() {
   );
 
   // Load fragment shader
-  fragmentShaderSource = document.getElementById("fragment-shader").text;
+  const fragmentShaderSource = document.getElementById("fragment-shader").text;
   const fragmentShader = getShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
   // Attach fragment shader
   gl.attachShader(program, fragmentShader);
@@ -155,7 +157,7 @@ window.onload = function() {
 
   function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexCount);
     requestAnimationFrame(render);
   }
 
