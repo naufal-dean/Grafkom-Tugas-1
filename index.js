@@ -108,10 +108,7 @@ window.onload = function() {
       const mGlCoord = getMouseGlCoordinate(e);
       vertices[draggedVertexOffset] = mGlCoord.x;
       vertices[draggedVertexOffset+1] = mGlCoord.y;
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-      // Render image
-      render();
+      setPositionBufferData();
     }
   }
 
