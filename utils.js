@@ -60,11 +60,11 @@ function getMouseGlCoordinate(gl, e) {
   // Get mouse coordinate relative to canvas
   // Assumption: canvas.height == canvas.clientHeight and canvas.width == canvas.clientWidth
   const rect = canvas.getBoundingClientRect();
-  posX = e.clientX - rect.left;
-  posY = e.clientY - rect.top;
+  const posX = e.clientX - rect.left;
+  const posY = e.clientY - rect.top;
   // Convert to webgl coordinate
-  glX = posX / gl.canvas.width * 2 - 1;
-  glY = posY / gl.canvas.height * (-2) + 1;
+  const glX = posX / gl.canvas.width * 2 - 1;
+  const glY = posY / gl.canvas.height * (-2) + 1;
   // Return
   return {
     x: glX,
@@ -72,24 +72,29 @@ function getMouseGlCoordinate(gl, e) {
   };
 }
 
-function getVertexOffset(gl, e, vertices) {
+function getVertexOffset(gl, e, models) {
   // Select vertex (check from topmost vertex)
   const mGlCoord = getMouseGlCoordinate(gl, e);
-  for (var i = vertices.length - 2; i >= 0 ; i -= 2) {
-    if (vertexInRange(mGlCoord, { x: vertices[i], y: vertices[i+1] })) {
-      return i;
+  // Iterate from last object
+  for (var i = models.length - 1; i >= 0 ; i--) {
+    // Iterate from last vertex
+    const vertices = models[i].vertices;
+    for (var j = vertices.length - 2; j >= 0 ; j -= 2) {
+      if (vertexInRange(mGlCoord, { x: vertices[j], y: vertices[j+1] })) {
+        return [models[i], j];
+      }
     }
   }
   // Return -1 if no vertex in mouse range
-  return -1;
+  return [null, -1];
 }
 
 function vertexInRange(mGlCoord, vGlCoord) {
   // Create vertex area lower and upper bound
-  lowerX = (vGlCoord.x > -0.9) ? (vGlCoord.x - 0.1) : (-1.0);
-  lowerY = (vGlCoord.y > -0.9) ? (vGlCoord.y - 0.1) : (-1.0);
-  upperX = (vGlCoord.x < 0.9) ? (vGlCoord.x + 0.1) : (1.0);
-  upperY = (vGlCoord.y < 0.9) ? (vGlCoord.y + 0.1) : (1.0);
+  const lowerX = (vGlCoord.x > -0.9) ? (vGlCoord.x - 0.1) : (-1.0);
+  const lowerY = (vGlCoord.y > -0.9) ? (vGlCoord.y - 0.1) : (-1.0);
+  const upperX = (vGlCoord.x < 0.9) ? (vGlCoord.x + 0.1) : (1.0);
+  const upperY = (vGlCoord.y < 0.9) ? (vGlCoord.y + 0.1) : (1.0);
   // Return true if mouse inside vertex area, otherwise false
   return (
     lowerX < mGlCoord.x && mGlCoord.x < upperX &&
