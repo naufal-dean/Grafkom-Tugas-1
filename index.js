@@ -1,12 +1,6 @@
 "use strict";
 
 window.onload = function() {
-  // Some variable declaration
-  const defaultVertexColor = [1.0, 1.0, 1.0, 1.0];
-  var vertexCount = 0;
-  var vertices = [];
-  var colors = [];
-
   // Get canvas
   const canvas = document.getElementById("canvas");
 
@@ -23,29 +17,63 @@ window.onload = function() {
 
   // Create program
   const program = createProgram(gl);
-  if (!program) return
+  if (!program) return;
 
   // Use program
   gl.useProgram(program);
 
-  // Bind position buffer
+  // Models array
+  var vertices1 = [
+    0.0, 0.0,
+    0.0, 0.5,
+    0.5, 0.0,
+  ];
+  var colors1 = [
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+  ];
+  var vertices2 = [
+    0.0, 0.0,
+    0.0, -0.5,
+    -0.5, 0.0,
+  ];
+  var colors2 = [
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+  ];
+  var models = [
+    new Polygon(gl.TRIANGLE_FAN, vertices1, colors1, 3),
+    new Polygon(gl.TRIANGLE_FAN, vertices2, colors2, 3)
+  ];
+
+  // Create position and color buffer
   var positionBuffer = gl.createBuffer();
-  setPositionBufferData();
+  var colorBuffer = gl.createBuffer();
+
+  // Bind position buffer
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   // Associate shader position variable with data buffer
-  var vPositionAttr = gl.getAttribLocation(program, "vPositionAttr");
+  const vPositionAttr = gl.getAttribLocation(program, "vPositionAttr");
   gl.vertexAttribPointer(vPositionAttr, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vPositionAttr);
 
   // Bind color buffer
-  const colorBuffer = gl.createBuffer();
-  setColorBufferData();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
   // Associate shader color variable with data buffer
-  var vColorAttr = gl.getAttribLocation(program, "vColorAttr");
+  const vColorAttr = gl.getAttribLocation(program, "vColorAttr");
   gl.vertexAttribPointer(vColorAttr, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vColorAttr);
 
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(models[0].drawMode, 0, models[0].vertexCount);
+
+
   // Set canvas event listener
+  var selectedModel = null;
   var selectedVertexOffset = -1;
+  var draggedModel = null;
   var draggedVertexOffset = -1;
   var dragged = false;
 
@@ -57,7 +85,7 @@ window.onload = function() {
         addVertex(mGlCoord.x, mGlCoord.y);
       } else {
         // select vertex
-        selectedVertexOffset = getVertexOffset(gl, e, vertices);
+        [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
       }
     } else {
       dragged = false;
@@ -65,7 +93,7 @@ window.onload = function() {
   }
 
   function mouseDownHandler(e) {
-    draggedVertexOffset = getVertexOffset(gl, e, vertices);
+    [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
   }
 
   function mouseUpHandler(e) {
@@ -81,9 +109,9 @@ window.onload = function() {
       dragged = true;
       // Update vertex data
       const mGlCoord = getMouseGlCoordinate(gl, e);
-      vertices[draggedVertexOffset] = mGlCoord.x;
-      vertices[draggedVertexOffset+1] = mGlCoord.y;
-      setPositionBufferData();
+      draggedModel.vertices[draggedVertexOffset] = mGlCoord.x;
+      draggedModel.vertices[draggedVertexOffset+1] = mGlCoord.y;
+      setPositionBufferData(draggedModel);
     }
   }
 
@@ -103,8 +131,8 @@ window.onload = function() {
   document.getElementById("loadbtn").addEventListener("click", function(e) {
     loadModel("loadfile", function(unpacked) {
       [vertices, colors, vertexCount] = unpacked;
-      setPositionBufferData();
-      setColorBufferData();
+      setPositionBufferData(draggedModel);
+      setColorBufferData(draggedModel);
     });
   }, false);
 
@@ -112,25 +140,34 @@ window.onload = function() {
   function addVertex(x, y) {
     vertexCount++;
     vertices.push(x, y);
-    colors.push(...defaultVertexColor)  // Use default vertex color
-    setPositionBufferData();
-    setColorBufferData();
+    colors.push(...DEFAULT_VERTEX_COLOR) // Use default vertex color
+    setPositionBufferData(draggedModel);
+    setColorBufferData(draggedModel);
   }
 
   // Render helpers
-  function setPositionBufferData() {
+  function setPositionBufferData(model) {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.DYNAMIC_DRAW);
   }
 
-  function setColorBufferData() {
+  function setColorBufferData(model) {
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.colors), gl.DYNAMIC_DRAW);
   }
 
   function render() {
+    // Clear
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexCount);
+
+    // Draw model
+    models.forEach(function(model) {
+      setPositionBufferData(model);
+      setColorBufferData(model);
+      gl.drawArrays(model.drawMode, 0, model.vertexCount);
+    });
+
+    // Request next frame
     requestAnimationFrame(render);
   }
 
