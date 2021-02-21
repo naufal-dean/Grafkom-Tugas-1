@@ -19,16 +19,17 @@ function saveModel(vertices, colors) {
   document.body.removeChild(temp);
 }
 
-function loadModel() {
-
+function loadModel(data) {
+  console.log(data);
 }
 
 // Helper function to pack model to string, vice versa
 function packModel(vertices, colors) {
-  const dataLen = Math.min(
-    Math.floor(vertices.length / 2), // x, y
-    Math.floor(colors.length / 4) // r, g, b, a
-  );
+  if (Math.floor(vertices.length / 2) != Math.floor(colors.length / 4)) {
+    alert("Vertices and colors array length mismatch");
+    return null;
+  }
+  const dataLen = Math.floor(vertices.length / 2);
 
   var res = ""
   // Data len
@@ -46,6 +47,33 @@ function packModel(vertices, colors) {
   return res;
 }
 
-function unpackModel() {
-
+function unpackModel(data) {
+  // Read data, and filter empty string
+  const lines = data.split("\n").filter(line => line);
+  // Get data len
+  const dataLen = parseInt(lines[0])
+  // Read vertice data
+  var vertices = [];
+  for (var i = 1; i < 1 + dataLen; i++) {
+    // Parse coordinates from data line
+    const coord = lines[i].split(" ");
+    if (coord.length != 2) {
+      alert("Malformed input data");
+      return null;
+    }
+    vertices.push(parseFloat(coord[0]), parseFloat(coord[1]));
+  }
+  // Read color data
+  var colors = [];
+  for (var i = 1 + dataLen; i < 1 + (dataLen * 2); i++) {
+    // Parse coordinates from data line
+    const rgba = lines[i].split(" ");
+    if (rgba.length != 4) {
+      alert("Malformed input data");
+      return null;
+    }
+    colors.push(parseFloat(rgba[0]), parseFloat(rgba[1]), parseFloat(rgba[2]), parseFloat(rgba[3]));
+  }
+  // Return
+  return [vertices, colors];
 }
