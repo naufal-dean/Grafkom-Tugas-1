@@ -1,14 +1,21 @@
 "use strict";
 
-function saveModel(vertices, colors, vertexCount) {
-  // Pack datas
-  const packed = packModel(vertices, colors, vertexCount)
+function saveModels(models) {
+  // Pack models
+  var data = "";
+  // Models count
+  data += models.length + "\n";
+  // Packed models representation
+  models.forEach(function(model) {
+    const packed = packModel(model);
+    data += packed;
+  });
 
   // Create a tag with download attribute
   var temp = document.createElement("a");
   temp.setAttribute(
     "href",
-    "data:text/plain;charset=utf-8," + encodeURIComponent(packed)
+    "data:text/plain;charset=utf-8," + encodeURIComponent(data)
   );
   temp.setAttribute("download", "model");
 
@@ -21,12 +28,13 @@ function saveModel(vertices, colors, vertexCount) {
   document.body.removeChild(temp);
 }
 
-function loadModel(filesInputId, resultCallback) {
+function loadModels(filesInputId, resultCallback) {
   var unpacked;
   // Get file object
   const files = document.getElementById(filesInputId).files;
   if (files.length == 0) {
-    alert("No file selected!"); return;
+    alert("No file selected!");
+    return;
   }
   const file = files[0];
   // Create reader object
@@ -42,17 +50,18 @@ function loadModel(filesInputId, resultCallback) {
 }
 
 // Helper function to pack model to string, vice versa
-function packModel(vertices, colors, vertexCount) {
+function packModel(model) {
   var res = ""
   // Data len
-  res += vertexCount + "\n";
+  res += model.vertexCount + "\n";
   // Datas
-  for (var i = 0; i < vertexCount; i++) {
+  for (var i = 0; i < model.vertexCount; i++) {
     const i2 = i * 2;
-    res += vertices[i2] + " " + vertices[i2 + 1] + "\n";
+    res += model.vertices[i2] + " " + model.vertices[i2 + 1] + "\n";
   }
-  for (var i = 0; i < vertexCount; i++) {
+  for (var i = 0; i < model.vertexCount; i++) {
     const i4 = i * 4;
+    const colors = model.colors;
     res += colors[i4] + " " + colors[i4 + 1] + " " + colors[i4 + 2] + " " + colors[i4 + 3] + "\n";
   }
   // Return

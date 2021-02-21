@@ -124,12 +124,12 @@ window.onload = function() {
 
   // Set save button listener
   document.getElementById("savebtn").addEventListener("click", function(e) {
-    saveModel(vertices, colors, vertexCount);
+    saveModels(models);
   }, false);
 
   // Set load button listener
   document.getElementById("loadbtn").addEventListener("click", function(e) {
-    loadModel("loadfile", function(unpacked) {
+    loadModels("loadfile", function(unpacked) {
       [vertices, colors, vertexCount] = unpacked;
       setPositionBufferData(draggedModel);
       setColorBufferData(draggedModel);
