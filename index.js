@@ -56,7 +56,7 @@ window.onload = function() {
     0.5, -0.5,
   ];
   var positionBuffer = gl.createBuffer();
-  updatePositionBuffer();
+  setPositionBufferData();
   // Associate shader position variable with data buffer
   var vPositionAttr = gl.getAttribLocation(program, "vPositionAttr");
   gl.vertexAttribPointer(vPositionAttr, 2, gl.FLOAT, false, 0, 0);
@@ -70,7 +70,7 @@ window.onload = function() {
     1.0, 1.0, 1.0, 1.0,
   ];
   const colorBuffer = gl.createBuffer();
-  updateColorBuffer();
+  setColorBufferData();
   // Associate shader color variable with data buffer
   var vColorAttr = gl.getAttribLocation(program, "vColorAttr");
   gl.vertexAttribPointer(vColorAttr, 4, gl.FLOAT, false, 0, 0);
@@ -131,18 +131,18 @@ window.onload = function() {
   document.getElementById("loadbtn").addEventListener("click", function(e) {
     loadModel("loadfile", function(unpacked) {
       [vertices, colors] = unpacked;
-      updatePositionBuffer();
-      updateColorBuffer();
+      setPositionBufferData();
+      setColorBufferData();
     });
   }, false);
 
   // Render helpers
-  function updatePositionBuffer() {
+  function setPositionBufferData() {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
   }
 
-  function updateColorBuffer() {
+  function setColorBufferData() {
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
   }
