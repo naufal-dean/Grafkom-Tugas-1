@@ -56,25 +56,21 @@ window.onload = function() {
     0.5, -0.5,
   ];
   var positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-
+  updatePositionBuffer();
   // Associate shader position variable with data buffer
   var vPositionAttr = gl.getAttribLocation(program, "vPositionAttr");
   gl.vertexAttribPointer(vPositionAttr, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vPositionAttr);
 
   // Bind color buffer
-  const colors = [
+  var colors = [
     1.0, 0.0, 0.0, 1.0,
     0.0, 1.0, 0.0, 1.0,
     0.0, 0.0, 1.0, 1.0,
     1.0, 1.0, 1.0, 1.0,
   ];
   const colorBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
-
+  updateColorBuffer();
   // Associate shader color variable with data buffer
   var vColorAttr = gl.getAttribLocation(program, "vColorAttr");
   gl.vertexAttribPointer(vColorAttr, 4, gl.FLOAT, false, 0, 0);
@@ -126,23 +122,53 @@ window.onload = function() {
   canvas.addEventListener("mouseout", mouseOutHandler, false);
   canvas.addEventListener("mousemove", mouseMoveHandler, false);
 
-  // Set other listeners
-  savebtn = document.getElementById("savebtn");
-
-  function savebtnClickedHandler(e) {
+  // Set save button listener
+  document.getElementById("savebtn").addEventListener("click", function(e) {
     saveModel(vertices, colors);
+  }, false);
+
+  // Set load button listener
+  document.getElementById("loadbtn").addEventListener("click", function(e) {
+    // Get file object
+    const files = document.getElementById("loadfile").files;
+    if (files.length == 0) {
+      alert("No file selected!"); return;
+    }
+    const file = files[0];
+    // Create reader object
+    const reader = new FileReader();
+    reader.onload = (function(f) {
+      return function(e) {
+        [vertices, colors] = unpackModel(e.target.result);
+        updatePositionBuffer();
+        updateColorBuffer();
+      };
+    })(file);
+    // Read file
+    reader.readAsText(file);
+  }, false);
+
+  // Render helpers
+  function updatePositionBuffer() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
   }
 
-  savebtn.addEventListener("click", savebtnClickedHandler, false);
+  function updateColorBuffer() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
+  }
 
-  // Render image
+  function render() {
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+
+  // Call render
+
   render();
 };
-
-function render() {
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-}
 
 function getShader(type, source) {
   const shader = gl.createShader(type);
