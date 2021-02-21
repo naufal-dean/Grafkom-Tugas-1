@@ -1,8 +1,5 @@
 "use strict";
 
-var gl;
-var program;
-
 window.onload = function() {
   // Some variable declaration
   const defaultVertexColor = [1.0, 1.0, 1.0, 1.0];
@@ -14,9 +11,10 @@ window.onload = function() {
   const canvas = document.getElementById("canvas");
 
   // Get webgl context
-  gl = canvas.getContext("webgl");
+  const gl = canvas.getContext("webgl");
   if (!gl) {
     alert("WebGL context not available");
+    return;
   }
 
   // Setup webgl
@@ -24,33 +22,8 @@ window.onload = function() {
   gl.clearColor(0.0, 1.0, 1.0, 1.0);
 
   // Create program
-  program = gl.createProgram();
-
-  // Load vertex shader
-  const vertexShaderSource = document.getElementById("vertex-shader").text;
-  const vertexShader = getShader(gl.VERTEX_SHADER, vertexShaderSource);
-  // Attach vertex shader
-  gl.attachShader(program, vertexShader);
-  console.log(
-    "Attached shader:",
-    gl.getProgramParameter(program, gl.ATTACHED_SHADERS)
-  );
-
-  // Load fragment shader
-  const fragmentShaderSource = document.getElementById("fragment-shader").text;
-  const fragmentShader = getShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
-  // Attach fragment shader
-  gl.attachShader(program, fragmentShader);
-  console.log(
-    "Attached shader:",
-    gl.getProgramParameter(program, gl.ATTACHED_SHADERS)
-  );
-
-  // Link program
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert("Failed to link program");
-  }
+  const program = createProgram(gl);
+  if (!program) return
 
   // Use program
   gl.useProgram(program);
@@ -80,11 +53,11 @@ window.onload = function() {
     if (!dragged) {
       if (document.getElementById("add-point").checked) {
         // add new point to polygon
-        const mGlCoord = getMouseGlCoordinate(e);
+        const mGlCoord = getMouseGlCoordinate(gl, e);
         addVertex(mGlCoord.x, mGlCoord.y);
       } else {
         // select vertex
-        selectedVertexOffset = getVertexOffset(e, vertices);
+        selectedVertexOffset = getVertexOffset(gl, e, vertices);
       }
     } else {
       dragged = false;
@@ -92,7 +65,7 @@ window.onload = function() {
   }
 
   function mouseDownHandler(e) {
-    draggedVertexOffset = getVertexOffset(e, vertices);
+    draggedVertexOffset = getVertexOffset(gl, e, vertices);
   }
 
   function mouseUpHandler(e) {
@@ -107,7 +80,7 @@ window.onload = function() {
     if (draggedVertexOffset != -1) {
       dragged = true;
       // Update vertex data
-      const mGlCoord = getMouseGlCoordinate(e);
+      const mGlCoord = getMouseGlCoordinate(gl, e);
       vertices[draggedVertexOffset] = mGlCoord.x;
       vertices[draggedVertexOffset+1] = mGlCoord.y;
       setPositionBufferData();
@@ -164,16 +137,3 @@ window.onload = function() {
   // Call render
   render();
 };
-
-function getShader(type, source) {
-  const shader = gl.createShader(type);
-
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert("Failed to compile fragment shader");
-    return null;
-  }
-  return shader;
-}
