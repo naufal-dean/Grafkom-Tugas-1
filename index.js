@@ -2,6 +2,12 @@ var gl;
 var program;
 
 window.onload = function() {
+  // Some variable declaration
+  const defaultVertexColor = [1.0, 1.0, 1.0, 1.0];
+  var vertexCount = 0;
+  var vertices = [];
+  var colors = [];
+
   // Get canvas
   canvas = document.getElementById("canvas");
 
@@ -40,7 +46,6 @@ window.onload = function() {
 
   // Link program
   gl.linkProgram(program);
-
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     alert("Failed to link program");
   }
@@ -49,12 +54,6 @@ window.onload = function() {
   gl.useProgram(program);
 
   // Bind position buffer
-  var vertices = [
-    -1.0, -1.0,
-    -0.5, 0.5,
-    1.0, 1.0,
-    0.5, -0.5,
-  ];
   var positionBuffer = gl.createBuffer();
   setPositionBufferData();
   // Associate shader position variable with data buffer
@@ -63,12 +62,6 @@ window.onload = function() {
   gl.enableVertexAttribArray(vPositionAttr);
 
   // Bind color buffer
-  var colors = [
-    1.0, 0.0, 0.0, 1.0,
-    0.0, 1.0, 0.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-    1.0, 1.0, 1.0, 1.0,
-  ];
   const colorBuffer = gl.createBuffer();
   setColorBufferData();
   // Associate shader color variable with data buffer
@@ -83,7 +76,14 @@ window.onload = function() {
 
   function clickHandler(e) {
     if (!dragged) {
-      selectedVertexOffset = getVertexOffset(e, vertices);
+      if (document.getElementById("add-point").checked) {
+        // add new point to polygon
+        const mGlCoord = getMouseGlCoordinate(e);
+        addVertex(mGlCoord.x, mGlCoord.y);
+      } else {
+        // select vertex
+        selectedVertexOffset = getVertexOffset(e, vertices);
+      }
     } else {
       dragged = false;
     }
@@ -133,6 +133,15 @@ window.onload = function() {
     });
   }, false);
 
+  // Modify vertex and color helpers
+  function addVertex(x, y) {
+    vertexCount++;
+    vertices.push(x, y);
+    colors.push(...defaultVertexColor)  // Use default vertex color
+    setPositionBufferData();
+    setColorBufferData();
+  }
+
   // Render helpers
   function setPositionBufferData() {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -146,7 +155,7 @@ window.onload = function() {
 
   function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount);
     requestAnimationFrame(render);
   }
 
