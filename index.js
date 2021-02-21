@@ -129,23 +129,11 @@ window.onload = function() {
 
   // Set load button listener
   document.getElementById("loadbtn").addEventListener("click", function(e) {
-    // Get file object
-    const files = document.getElementById("loadfile").files;
-    if (files.length == 0) {
-      alert("No file selected!"); return;
-    }
-    const file = files[0];
-    // Create reader object
-    const reader = new FileReader();
-    reader.onload = (function(f) {
-      return function(e) {
-        [vertices, colors] = unpackModel(e.target.result);
-        updatePositionBuffer();
-        updateColorBuffer();
-      };
-    })(file);
-    // Read file
-    reader.readAsText(file);
+    loadModel("loadfile", function(unpacked) {
+      [vertices, colors] = unpacked;
+      updatePositionBuffer();
+      updateColorBuffer();
+    });
   }, false);
 
   // Render helpers
@@ -166,7 +154,6 @@ window.onload = function() {
   }
 
   // Call render
-
   render();
 };
 

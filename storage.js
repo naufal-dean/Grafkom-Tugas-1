@@ -19,8 +19,24 @@ function saveModel(vertices, colors) {
   document.body.removeChild(temp);
 }
 
-function loadModel(data) {
-  console.log(data);
+function loadModel(filesInputId, resultCallback) {
+  var unpacked;
+  // Get file object
+  const files = document.getElementById(filesInputId).files;
+  if (files.length == 0) {
+    alert("No file selected!"); return;
+  }
+  const file = files[0];
+  // Create reader object
+  const reader = new FileReader();
+  reader.onload = (function(f) {
+    return function(e) {
+      unpacked = unpackModel(e.target.result);
+      resultCallback(unpacked);
+    };
+  })(file);
+  // Read file
+  reader.readAsText(file);
 }
 
 // Helper function to pack model to string, vice versa
