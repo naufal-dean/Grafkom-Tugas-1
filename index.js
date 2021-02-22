@@ -82,15 +82,14 @@ window.onload = function() {
   var isMouseDown = false;
   var dragged = false;
 
+  var polygonModelCreated = false;
+
   function clickHandler(e) {
     if (!dragged) {
-      if (document.getElementById("add-point").checked) {
-        // add new point to polygon
-        const mGlCoord = getMouseGlCoordinate(gl, e);
-        // addVertex(mGlCoord.x, mGlCoord.y);
-      } else {
-        // select vertex
-        [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
+      if (modelInput === MODEL_INPUT_POLYGON) {
+        drawPolygonMouseClickHelper(e);
+      } else if (modelInput === MODEL_INPUT_NONE) {
+        // [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
       }
     } else {
       dragged = false;
@@ -162,6 +161,7 @@ window.onload = function() {
     modelInputRadio[i].addEventListener("change", function() {
       if (this.value !== modelInput)
         modelInput = this.value;
+      polygonModelCreated = false;
     }, false);
   }
 
@@ -176,15 +176,6 @@ window.onload = function() {
       models = loadedModels;
     });
   }, false);
-
-  // Modify vertex and color helpers
-  function addVertex(model, x, y) {
-    vertexCount++;
-    vertices.push(x, y);
-    colors.push(...DEFAULT_VERTEX_COLOR) // Use default vertex color
-    setPositionBufferData(model);
-    setColorBufferData(model);
-  }
 
   // Draw model helpers
   function drawLineMouseDownHelper(e) {
@@ -252,6 +243,26 @@ window.onload = function() {
       setPositionBufferData(model);
     }
   }
+
+  function drawPolygonMouseClickHelper(e) {
+    // Create new model if not already created in this input session
+    var newModel;
+    if (!polygonModelCreated) {
+      newModel = new Polygon(gl.TRIANGLE_FAN, [], [], 0);
+      models.push(newModel);
+      polygonModelCreated = true;
+    } else {
+      newModel = models[models.length - 1];
+    }
+    // Add new vertex
+    const mGlCoord = getMouseGlCoordinate(gl, e);
+    newModel.vertices.push(mGlCoord.x, mGlCoord.y);
+    newModel.colors.push(...DEFAULT_VERTEX_COLOR);
+    newModel.vertexCount++;
+    // Set buffer data
+    setPositionBufferData(newModel);
+  }
+
 
   // Render helpers
   function setPositionBufferData(model) {
