@@ -77,6 +77,9 @@ window.onload = function() {
   var selectedVertexOffset = -1;
   var draggedModel = null;
   var draggedVertexOffset = -1;
+
+  var modelInput = MODEL_INPUT_NONE;
+  var isMouseDown = false;
   var dragged = false;
 
   function clickHandler(e) {
@@ -95,25 +98,50 @@ window.onload = function() {
   }
 
   function mouseDownHandler(e) {
-    [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
+    isMouseDown = true;
+
+    if (modelInput === MODEL_INPUT_LINE) {
+      drawLineMouseDownHelper(e);
+    } else if (modelInput === MODEL_INPUT_NONE) {
+      // [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
+    }
   }
 
   function mouseUpHandler(e) {
-    draggedVertexOffset = -1;
+    isMouseDown = false;
+
+    if (modelInput === MODEL_INPUT_NONE) {
+      draggedModel = null;
+      draggedVertexOffset = -1;
+    }
   }
 
   function mouseOutHandler(e) {
-    draggedVertexOffset = -1;
+    // Simulate mouse up when cursor out of canvas
+    isMouseDown = false;
+
+    if (modelInput === MODEL_INPUT_NONE) {
+      // draggedModel = null;
+      // draggedVertexOffset = -1;
+    }
   }
 
   function mouseMoveHandler(e) {
-    if (draggedVertexOffset != -1) {
+    // Set dragged flag to true if mouse down then move
+    if (isMouseDown)
       dragged = true;
-      // Update vertex data
-      const mGlCoord = getMouseGlCoordinate(gl, e);
-      draggedModel.vertices[draggedVertexOffset] = mGlCoord.x;
-      draggedModel.vertices[draggedVertexOffset+1] = mGlCoord.y;
-      setPositionBufferData(draggedModel);
+
+    if (modelInput === MODEL_INPUT_LINE) {
+      drawLineMouseMoveHelper(e);
+    } else if (modelInput === MODEL_INPUT_NONE) {
+      // if (draggedVertexOffset != -1) {
+      //   dragged = true;
+      //   // Update vertex data
+      //   const mGlCoord = getMouseGlCoordinate(gl, e);
+      //   draggedModel.vertices[draggedVertexOffset] = mGlCoord.x;
+      //   draggedModel.vertices[draggedVertexOffset+1] = mGlCoord.y;
+      //   setPositionBufferData(draggedModel);
+      // }
     }
   }
 
@@ -152,6 +180,26 @@ window.onload = function() {
     colors.push(...DEFAULT_VERTEX_COLOR) // Use default vertex color
     setPositionBufferData(model);
     setColorBufferData(model);
+  }
+
+  // Draw model helpers
+  function drawLineMouseDownHelper(e) {
+    // Create new model
+    const mGlCoord = getMouseGlCoordinate(gl, e);
+    const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
+    var newModel = new Line(gl.LINES, vertices, [...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR]);
+    models.push(newModel);
+  }
+
+  function drawLineMouseMoveHelper(e) {
+    if (isMouseDown) {
+      // Continue to draw the line by dragging from initial point
+      const mGlCoord = getMouseGlCoordinate(gl, e);
+      const model = models[models.length - 1];
+      model.vertices[2] = mGlCoord.x;
+      model.vertices[3] = mGlCoord.y;
+      setPositionBufferData(model);
+    }
   }
 
   // Render helpers
