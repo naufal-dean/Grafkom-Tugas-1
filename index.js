@@ -89,7 +89,7 @@ window.onload = function() {
       if (modelInput === MODEL_INPUT_POLYGON) {
         drawPolygonMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_NONE) {
-        // [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
+        [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
       }
     } else {
       dragged = false;
@@ -104,7 +104,7 @@ window.onload = function() {
     } else if (modelInput === MODEL_INPUT_SQUARE) {
       drawSquareMouseDownHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
-      // [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
+      [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
     }
   }
 
@@ -122,8 +122,8 @@ window.onload = function() {
     isMouseDown = false;
 
     if (modelInput === MODEL_INPUT_NONE) {
-      // draggedModel = null;
-      // draggedVertexOffset = -1;
+      draggedModel = null;
+      draggedVertexOffset = -1;
     }
   }
 
@@ -137,14 +137,7 @@ window.onload = function() {
     } else if (modelInput === MODEL_INPUT_SQUARE) {
       drawSquareMouseMoveHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
-      // if (draggedVertexOffset != -1) {
-      //   dragged = true;
-      //   // Update vertex data
-      //   const mGlCoord = getMouseGlCoordinate(gl, e);
-      //   draggedModel.vertices[draggedVertexOffset] = mGlCoord.x;
-      //   draggedModel.vertices[draggedVertexOffset+1] = mGlCoord.y;
-      //   setPositionBufferData(draggedModel);
-      // }
+      noInputMouseMoveHelper(e);
     }
   }
 
@@ -161,6 +154,11 @@ window.onload = function() {
     modelInputRadio[i].addEventListener("change", function() {
       if (this.value !== modelInput)
         modelInput = this.value;
+      // Reset some variables
+      selectedModel = null;
+      selectedVertexOffset = -1;
+      draggedModel = null;
+      draggedVertexOffset = -1;
       polygonModelCreated = false;
     }, false);
   }
@@ -222,8 +220,8 @@ window.onload = function() {
         Math.abs(mGlCoord.x - origin.x),
         Math.abs(mGlCoord.y - origin.y)
       );
-      const xDirection = (mGlCoord.x > origin.x) ? 1 : -1;  // if true, mouse is in right of origin point
-      const yDirection = (mGlCoord.y > origin.y) ? 1 : -1;  // if true, mouse is in above of origin point
+      const xDirection = (mGlCoord.x > origin.x) ? 1 : -1; // if true, mouse is in right of origin point
+      const yDirection = (mGlCoord.y > origin.y) ? 1 : -1; // if true, mouse is in above of origin point
       const target = {
         x: origin.x + (sideLength * xDirection),
         y: origin.y + (sideLength * yDirection)
@@ -261,6 +259,22 @@ window.onload = function() {
     newModel.vertexCount++;
     // Set buffer data
     setPositionBufferData(newModel);
+  }
+
+  function noInputMouseMoveHelper(e) {
+    if (isMouseDown) {
+      if (draggedVertexOffset != -1) {  // any vertex selected
+        if (draggedModel.type === MODEL_INPUT_SQUARE) {
+          // TODO: implement
+        } else {
+          // Update vertex data
+          const mGlCoord = getMouseGlCoordinate(gl, e);
+          draggedModel.vertices[draggedVertexOffset] = mGlCoord.x;
+          draggedModel.vertices[draggedVertexOffset + 1] = mGlCoord.y;
+          setPositionBufferData(draggedModel);
+        }
+      }
+    }
   }
 
 
