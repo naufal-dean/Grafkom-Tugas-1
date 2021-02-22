@@ -102,6 +102,8 @@ window.onload = function() {
 
     if (modelInput === MODEL_INPUT_LINE) {
       drawLineMouseDownHelper(e);
+    } else if (modelInput === MODEL_INPUT_SQUARE) {
+      drawSquareMouseDownHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
       // [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
     }
@@ -133,6 +135,8 @@ window.onload = function() {
 
     if (modelInput === MODEL_INPUT_LINE) {
       drawLineMouseMoveHelper(e);
+    } else if (modelInput === MODEL_INPUT_SQUARE) {
+      drawSquareMouseMoveHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
       // if (draggedVertexOffset != -1) {
       //   dragged = true;
@@ -198,6 +202,53 @@ window.onload = function() {
       const model = models[models.length - 1];
       model.vertices[2] = mGlCoord.x;
       model.vertices[3] = mGlCoord.y;
+      setPositionBufferData(model);
+    }
+  }
+
+  function drawSquareMouseDownHelper(e) {
+    // Create new model
+    const mGlCoord = getMouseGlCoordinate(gl, e);
+    const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
+    const colors = [...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR];
+    var newModel = new Square(gl.TRIANGLES, vertices, colors);
+    models.push(newModel);
+  }
+
+  function drawSquareMouseMoveHelper(e) {
+    if (isMouseDown) {
+      // Continue to draw the line by dragging from initial point
+      const mGlCoord = getMouseGlCoordinate(gl, e);
+      // Get model that is currently drawed
+      const model = models[models.length - 1];
+      // Get drag origin coordinate
+      const origin = {
+        x: model.vertices[0],
+        y: model.vertices[1]
+      };
+      // Calculate target coordinate (opposite direction with the origin point)
+      const sideLength = Math.max(
+        Math.abs(mGlCoord.x - origin.x),
+        Math.abs(mGlCoord.y - origin.y)
+      );
+      const xDirection = (mGlCoord.x > origin.x) ? 1 : -1;  // if true, mouse is in right of origin point
+      const yDirection = (mGlCoord.y > origin.y) ? 1 : -1;  // if true, mouse is in above of origin point
+      const target = {
+        x: origin.x + (sideLength * xDirection),
+        y: origin.y + (sideLength * yDirection)
+      };
+      // Update model vertices
+      model.vertices[2] = target.x;
+      model.vertices[3] = origin.y;
+      model.vertices[4] = origin.x;
+      model.vertices[5] = target.y;
+      model.vertices[6] = target.x;
+      model.vertices[7] = origin.y;
+      model.vertices[8] = origin.x;
+      model.vertices[9] = target.y;
+      model.vertices[10] = target.x;
+      model.vertices[11] = target.y;
+      // Set buffer data
       setPositionBufferData(model);
     }
   }
