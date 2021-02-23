@@ -1,7 +1,11 @@
 "use strict";
 
-function getColor() {
-  var hex = document.getElementById("change-color-input").value;
+const BG_COLOR_INPUT = "bg-color-input";
+const DEFAULT_COLOR_INPUT = "default-color-input";
+const CHANGE_COLOR_INPUT = "change-color-input";
+
+function getColor(colorInputId) {
+  var hex = document.getElementById(colorInputId).value;
   var R = parseInt(hexToRgb(hex)[1], 16) / 255;
   var G = parseInt(hexToRgb(hex)[2], 16) / 255;
   var B = parseInt(hexToRgb(hex)[3], 16) / 255;

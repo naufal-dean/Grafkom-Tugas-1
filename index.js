@@ -20,7 +20,7 @@ window.onload = function() {
 
   // Setup webgl
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0.0, 1.0, 1.0, 1.0);
+  gl.clearColor(...getColor(BG_COLOR_INPUT));
 
   // Create program
   const program = createProgram(gl);
@@ -151,6 +151,11 @@ window.onload = function() {
   canvas.addEventListener("mouseout", mouseOutHandler, false);
   canvas.addEventListener("mousemove", mouseMoveHandler, false);
 
+  // Set general settings input listener
+  document.getElementById("bg-color-input").addEventListener("input", function(e) {
+    gl.clearColor(...getColor(BG_COLOR_INPUT));
+  }, false);
+
   // Set model input radio listener
   const modelInputRadio = document.getElementsByName("model-input");
   for (var i = 0; i < modelInputRadio.length; i++) {
@@ -201,7 +206,6 @@ window.onload = function() {
     }
   }, false);
 
-
   // Set save button listener
   document.getElementById("savebtn").addEventListener("click", function(e) {
     saveModels(models);
@@ -219,8 +223,9 @@ window.onload = function() {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
     const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
-    var VERTEX_COLOR = getColor();
-    var newModel = new Line(gl.LINES, vertices, [...VERTEX_COLOR, ...VERTEX_COLOR]);
+    const defaultColor = getColor(DEFAULT_COLOR_INPUT);
+    const colors = [...defaultColor, ...defaultColor];
+    var newModel = new Line(gl.LINES, vertices, colors);
     models.push(newModel);
   }
 
@@ -239,8 +244,8 @@ window.onload = function() {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
     const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
-    var VERTEX_COLOR = getColor();
-    const colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+    const defaultColor = getColor(DEFAULT_COLOR_INPUT);
+    const colors = [...defaultColor, ...defaultColor, ...defaultColor, ...defaultColor];
     var newModel = new Square(gl.TRIANGLE_FAN, vertices, colors);
     models.push(newModel);
   }
@@ -292,8 +297,7 @@ window.onload = function() {
     // Add new vertex
     const mGlCoord = getMouseGlCoordinate(gl, e);
     newModel.vertices.push(mGlCoord.x, mGlCoord.y);
-    var VERTEX_COLOR = getColor();
-    newModel.colors.push(...VERTEX_COLOR);
+    newModel.colors.push(...getColor(DEFAULT_COLOR_INPUT));
     newModel.vertexCount++;
     // Set buffer data
     setPositionBufferData(newModel);
@@ -359,7 +363,7 @@ window.onload = function() {
     const [clickedModel, clickedVertexOffset] = getVertexOffset(gl, e, models);
     // Change the color of selected vertex
     if (clickedVertexOffset != -1) {
-      var newColor = getColor();
+      var newColor = getColor(CHANGE_COLOR_INPUT);
       var j = 0;
       for (i = (clickedVertexOffset * 2); i < 4 + (clickedVertexOffset * 2); i++) {
         clickedModel.colors[i] = newColor[j];
