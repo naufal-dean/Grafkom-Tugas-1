@@ -1,10 +1,11 @@
 "use strict";
 
-const MODEL_INPUT_NONE = "none";
+const MODEL_INPUT_NONE = "drag";
 const MODEL_INPUT_LINE = "line";
 const MODEL_INPUT_SQUARE = "square";
 const MODEL_INPUT_POLYGON = "polygon";
 const MODEL_INPUT_COLOR = "color";
+const MODEL_INPUT_CHANGE_SQUARE_SIZE = "change-square-size";
 
 window.onload = function() {
   // Get canvas
@@ -78,6 +79,7 @@ window.onload = function() {
   var selectedVertexOffset = -1;
   var draggedModel = null;
   var draggedVertexOffset = -1;
+  var selectedSquareModel = null;
 
   var modelInput = MODEL_INPUT_NONE;
   var isMouseDown = false;
@@ -91,6 +93,14 @@ window.onload = function() {
         drawPolygonMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_COLOR) {
         [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
+      } else if (modelInput === MODEL_INPUT_CHANGE_SQUARE_SIZE) {
+        selectedSquareModel = getSquareModelClicked(gl, e, models);
+        if (selectedSquareModel !== null) {  // Any square selected
+          const sideLength = Math.abs(selectedSquareModel.vertices[0] - selectedSquareModel.vertices[10]);
+          // Convert length in gl (max 2) to percentage (max 100)
+          const sliderVal = (sideLength * 100) / 2;
+          document.getElementById("square-size-slider").value = String(sliderVal);
+        }
       }
     } else {
       dragged = false;
@@ -107,7 +117,6 @@ window.onload = function() {
     } else if (modelInput === MODEL_INPUT_NONE) {
       [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
     }
-
   }
 
   function mouseUpHandler(e) {
@@ -163,9 +172,40 @@ window.onload = function() {
       selectedVertexOffset = -1;
       draggedModel = null;
       draggedVertexOffset = -1;
+      selectedSquareModel = null;
       polygonModelCreated = false;
     }, false);
   }
+
+  // Set change square size slider listener
+  document.getElementById("square-size-slider").addEventListener("input", function(e) {
+    if (selectedSquareModel) {
+      // Convert length percentage (max 100) to length in gl (max 2)
+      const sideLength = (this.value * 2) / 100;
+      const halfSideLength = sideLength / 2;
+      // Get center of the square
+      const centerX = (selectedSquareModel.vertices[0] + selectedSquareModel.vertices[10]) / 2;
+      const centerY = (selectedSquareModel.vertices[1] + selectedSquareModel.vertices[11]) / 2;
+      const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };  // top left
+      const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };  // bottom right
+      // Update square size relative to the center
+      selectedSquareModel.vertices[0] = newOrigin.x;
+      selectedSquareModel.vertices[1] = newOrigin.y;
+      selectedSquareModel.vertices[2] = newTarget.x;
+      selectedSquareModel.vertices[3] = newOrigin.y;
+      selectedSquareModel.vertices[4] = newOrigin.x;
+      selectedSquareModel.vertices[5] = newTarget.y;
+      selectedSquareModel.vertices[6] = newTarget.x;
+      selectedSquareModel.vertices[7] = newOrigin.y;
+      selectedSquareModel.vertices[8] = newOrigin.x;
+      selectedSquareModel.vertices[9] = newTarget.y;
+      selectedSquareModel.vertices[10] = newTarget.x;
+      selectedSquareModel.vertices[11] = newTarget.y;
+      // Set buffer data
+      setPositionBufferData(selectedSquareModel);
+    }
+  }, false);
+
 
   // Set save button listener
   document.getElementById("savebtn").addEventListener("click", function(e) {
@@ -312,15 +352,28 @@ window.onload = function() {
   function changeColorMouseMoveHelper() {
     if (!isMouseDown) {
       if (selectedVertexOffset != -1) {  // any vertex selected
-        var VERTEX_COLOR = getColor();
+        var NEW_COLOR = getColor();
+        var j = 0;
         if (selectedModel.type === MODEL_INPUT_LINE) {
-          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR];
+          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+            selectedModel.colors[i] = NEW_COLOR[j];
+            j++;
+          }
         }
         else if (selectedModel.type === MODEL_INPUT_POLYGON) {
-          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+            selectedModel.colors[i] = NEW_COLOR[j];
+            j++;
+          }
         }
         else if (selectedModel.type === MODEL_INPUT_SQUARE) {
-          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+            selectedModel.colors[i] = NEW_COLOR[j];
+            if ((selectedVertexOffset > 4) && (selectedVertexOffset < 10)) {
+              selectedModel.colors[i - 8] = NEW_COLOR[j];
+            }
+            j++;
+          }
         }
         setColorBufferData(selectedModel);
       }

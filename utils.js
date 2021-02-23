@@ -54,6 +54,7 @@ function getShader(gl, type, source) {
  * @getMouseGlCoordinate
  * @getVertexOffset
  * @vertexInRange
+ * @getSquareModelClicked
  */
 
 function getMouseGlCoordinate(gl, e) {
@@ -79,7 +80,7 @@ function getVertexOffset(gl, e, models) {
   for (var i = models.length - 1; i >= 0 ; i--) {
     // Iterate from last vertex
     const vertices = models[i].vertices;
-    for (var j = vertices.length - 2; j >= 0 ; j -= 2) {
+    for (var j = vertices.length - 2; j >= 0; j -= 2) {
       if (vertexInRange(mGlCoord, { x: vertices[j], y: vertices[j+1] })) {
         return [models[i], j];
       }
@@ -100,4 +101,37 @@ function vertexInRange(mGlCoord, vGlCoord) {
     lowerX < mGlCoord.x && mGlCoord.x < upperX &&
     lowerY < mGlCoord.y && mGlCoord.y < upperY
   );
+}
+
+function getSquareModelClicked(gl, e, models) {
+  // Select vertex (check from topmost vertex)
+  const mGlCoord = getMouseGlCoordinate(gl, e);
+  // Iterate from last object
+  for (var i = models.length - 1; i >= 0 ; i--) {
+    if (models[i].type === SQUARE_MODEL) {
+      if (squareInRange(mGlCoord, models[i])) {
+        return models[i];
+      }
+    }
+  }
+  // Return null if no model in mouse range
+  return null;
+}
+
+function squareInRange(mGlCoord, squareModel) {
+  // Create square area lower and upper bound
+  const lowerX = Math.min(squareModel.vertices[0], squareModel.vertices[10]);
+  const lowerY = Math.min(squareModel.vertices[1], squareModel.vertices[11]);
+  const upperX = Math.max(squareModel.vertices[0], squareModel.vertices[10]);
+  const upperY = Math.max(squareModel.vertices[1], squareModel.vertices[11]);
+  // Return true if mouse inside vertex area, otherwise false
+  return (
+    lowerX < mGlCoord.x && mGlCoord.x < upperX &&
+    lowerY < mGlCoord.y && mGlCoord.y < upperY
+  );
+}
+
+function lineInRange(mGlCoord, lineModel) {
+  // TODO: implement
+  return false;
 }

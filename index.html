@@ -24,8 +24,8 @@
     <script src="utils.js" type="text/javascript" charset="utf-8"></script>
     <script src="model.js" type="text/javascript" charset="utf-8"></script>
     <script src="storage.js" type="text/javascript" charset="utf-8"></script>
-    <script src="index.js" type="text/javascript" charset="utf-8"></script>
     <script src="color.js" type="text/javascript" charset="utf-8"></script>
+    <script src="index.js" type="text/javascript" charset="utf-8"></script>
   </head>
   <body>
     <!-- The canvas -->
@@ -35,21 +35,20 @@
     <br /><br />
     <!-- Input model radio button -->
     <p>Select input:</p>
-    <input type="radio" name="model-input" value="none" checked><span>Drag</span><br />
+    <input type="radio" name="model-input" value="drag" checked><span>Drag</span><br />
     <input type="radio" name="model-input" value="line"><span>Line</span><br />
     <input type="radio" name="model-input" value="square"><span>Square</span><br />
     <input type="radio" name="model-input" value="polygon"><span>Polygon</span><br />
+    <!-- Change color -->
     <input type="radio" name="model-input" value="color"><span>Change Color</span><br />
-    <br />
-    <!-- <p>Select color: -->
-    <!-- <span>R : </span><input type="number" name="r-input" value="255" min="0" max="255" onkeyup=inputHandler(this)><br />
-    <span>G: </span><input type="number" name="g-input" value="255" min="0" max="255" onkeyup=inputHandler(this)><br />
-    <span>B : </span><input type="number" name="b-input" value="255" min="0" max="255" onkeyup=inputHandler(this)><br /> -->
     <div class="field">
       <label for="color-input">Select Color : </label>
       <input id="color-input" name="color-input" type="color" value="#FFFFFF">
     </div>
     <br />
+    <!-- Change square size -->
+    <input type="radio" name="model-input" value="change-square-size"><span>Change Square Size</span><br />
+    <input type="range" id="square-size-slider" min="0" max="100" value="0"><br />
     <!-- Save and load button -->
     <button id="savebtn" type="button" name="savebtn">Save Model</button><br />
     <input id="loadfile" type="file" /><br />
