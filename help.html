@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>WebGL Help</title>
+  </head>
+  <body>
+    <div>
+      <h1>WebGL Help</h1>
+      <h2>Operasi yang didukung:</h2>
+      <ul>
+        <li>
+          <h3>Membuat model garis</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Draw Line".</li>
+            <li>Drag pada canvas mulai dari titik A (jangan lepaskan drag terlebih dahulu).</li>
+            <li>
+              Garis yang akan terbentuk dapat dilihat pada canvas. Garis tersebut akan bermula
+              dari titik A dan mengikuti posisi mouse.
+            </li>
+            <li>Lepaskan drag untuk <em>commit</em> proses penggambaran model garis.</li>
+            <li>Ulangi langkah di atas jika ingin menggambar model garis lainnya.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Membuat model persegi</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Draw Square".</li>
+            <li>Drag pada canvas mulai dari titik A (jangan lepaskan drag terlebih dahulu).</li>
+            <li>
+              Persegi yang akan terbentuk dapat dilihat pada canvas dan mengikuti posisi mouse.
+              Titik A akan menjadi titik acuan dari persegi yang akan dibentuk.
+              Panjang sisi persegi bernilai max(delta x dari koordinat titik A dan mouse,
+              delta y dari koordinat titik A dan mouse).
+              Kelakuan ini sama seperti pada CorelDraw jika sedang memasukkan persegi.
+            </li>
+            <li>Lepaskan drag untuk <em>commit</em> proses penggambaran model persegi.</li>
+            <li>Ulangi langkah di atas jika ingin menggambar model persegi lainnya.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Membuat model poligon</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Draw Polygon".</li>
+            <li>Klik pada canvas, titik-titik pada poligon yang diinginkan.</li>
+          </ol>
+          <p>
+            Sebagai catatan model baru akan terlihat di canvas setelah input titik ke-3
+            (saat terbentuk segitiga).
+          </p>
+          <p>
+            Urutan input titik akan mempengaruhi poligon yang dihasilkan (elemen titik
+            digambar menggunakan mode gl.TRIANGLE_FAN).
+          </p>
+        </li>
+        <li>
+          <h3>Menyimpan (save) model ke file</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Klik tombol "Save Model".</li>
+            <li>File penyimpanan akan terdownload dengan nama default "model.txt".</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Memuat (load) file hasil penyimpanan model</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Klik tombol "Choose File" untuk memilih file penyimpanan.</li>
+            <li>Klik tombol "Load Model" untuk memuat model dari file yang telah dipilih.</li>
+            <li>Jika file valid, model akan dimuat ke canvas.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Menggeser titik kontrol dengan mouse</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Drag Vertex".</li>
+            <li>Drag vertex dari model apapun di canvas.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Mengubah panjang garis</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Drag Vertex".</li>
+            <li>Drag vertex dari model garis yang ingin diubah panjangnya.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Mengubah ukuran sisi persegi</h3>
+          <p>Langkah-langkah (metode 1):</p>
+          <ol>
+            <li>Pilih menu "Drag Vertex".</li>
+            <li>Drag vertex dari model persegi yang ingin diubah panjangnya.</li>
+          </ol>
+          <p>Langkah-langkah (metode 2):</p>
+          <ol>
+            <li>Pilih menu "Change Square Size".</li>
+            <li>Klik model persegi yang ingin diubah ukurannya.</li>
+            <li>Geser slider yang ada di bawah menu "Change Square Size".</li>
+          </ol>
+          <p>Sebagai catatan, nilai minimum slider dibatasi pada nilai 1.</p>
+          <p>
+            Selain itu, pada saat slider bernilai 100 (max), panjang sisi dari
+            persegi yang dipilih adalah 2 (pada koordinat webgl).
+          </p>
+        </li>
+        <li>
+          <h3>Mengubah warna poligon</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Change Color".</li>
+            <li>Pilih warna pada color picker berlabel "Select Color".</li>
+            <li>Pada canvas, klik pada vertex dari model apapun yang ingin diubah warnanya.</li>
+          </ol>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
