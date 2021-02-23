@@ -5,6 +5,7 @@ const MODEL_INPUT_LINE = "line";
 const MODEL_INPUT_SQUARE = "square";
 const MODEL_INPUT_POLYGON = "polygon";
 const MODEL_INPUT_COLOR = "color";
+const MODEL_INPUT_CHANGE_LINE_SIZE = "change-line-size";
 const MODEL_INPUT_CHANGE_SQUARE_SIZE = "change-square-size";
 
 window.onload = function() {
@@ -101,6 +102,16 @@ window.onload = function() {
           const sliderVal = (sideLength * 100) / 2;
           document.getElementById("square-size-slider").value = String(sliderVal);
         }
+      } else if (modelInput === MODEL_INPUT_CHANGE_LINE_SIZE) {
+        selectedLineModel = getLineModelClicked(gl, e, models);
+        if (selectedLineModel !== null) {  // Any line selected
+          xpower = Math.pow((selectedLineModel.vertices[2] - selectedLineModel.vertices[0]), 2);
+          ypower = Math.pow((selectedLineModel.vertices[3] - selectedLineModel.vertices[1]), 2);
+          const sideLength = Math.sqrt(xpower + ypower);
+          // Convert length in gl (max 2) to percentage (max 100)
+          const sliderVal = (sideLength * 100) / 2;
+          document.getElementById("line-size-slider").value = String(sliderVal);
+        }
       }
     } else {
       dragged = false;
@@ -176,6 +187,24 @@ window.onload = function() {
       polygonModelCreated = false;
     }, false);
   }
+
+  // Set change line size slider listener
+  document.getElementById("line-size-slider").addEventListener("input", function(e) {
+    if (selectedLineModel) {
+      // Convert length percentage (max 100) to length in gl (max 2)
+      const sideLength = (this.value * 2) / 100;
+      const halfSideLength = sideLength / 2;
+      const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };
+      const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };
+      // Update line size
+      selectLineModel.vertices[0] = newOrigin.x;
+      selectLineModel.vertices[1] = newOrigin.y;
+      selectLineModel.vertices[2] = newOrigin.x;
+      selectLineModel.vertices[3] = newOrigin.y;
+      // Set buffer data
+      setPositionBufferData(selectedLineModel);
+    }
+  }, false);
 
   // Set change square size slider listener
   document.getElementById("square-size-slider").addEventListener("input", function(e) {
