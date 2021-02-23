@@ -75,8 +75,6 @@ window.onload = function() {
 
 
   // Set canvas event listener
-  var selectedModel = null;
-  var selectedVertexOffset = -1;
   var draggedModel = null;
   var draggedVertexOffset = -1;
   var selectedSquareModel = null;
@@ -92,7 +90,7 @@ window.onload = function() {
       if (modelInput === MODEL_INPUT_POLYGON) {
         drawPolygonMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_COLOR) {
-        [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
+        changeColorMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_CHANGE_SQUARE_SIZE) {
         selectedSquareModel = getSquareModelClicked(gl, e, models);
         if (selectedSquareModel !== null) {  // Any square selected
@@ -149,8 +147,6 @@ window.onload = function() {
       drawSquareMouseMoveHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
       noInputMouseMoveHelper(e);
-    } else if (modelInput === MODEL_INPUT_COLOR) {
-      changeColorMouseMoveHelper();
     }
   }
 
@@ -168,8 +164,6 @@ window.onload = function() {
       if (this.value !== modelInput)
         modelInput = this.value;
       // Reset some variables
-      selectedModel = null;
-      selectedVertexOffset = -1;
       draggedModel = null;
       draggedVertexOffset = -1;
       selectedSquareModel = null;
@@ -356,34 +350,27 @@ window.onload = function() {
     }
   }
 
-  function changeColorMouseMoveHelper() {
-    if (!isMouseDown) {
-      if (selectedVertexOffset != -1) {  // any vertex selected
-        var NEW_COLOR = getColor();
-        var j = 0;
-        if (selectedModel.type === MODEL_INPUT_LINE) {
-          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-            selectedModel.colors[i] = NEW_COLOR[j];
-            j++;
-          }
+  function changeColorMouseClickHelper(e) {
+    const [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
+    // Change the color of selected vertex
+    if (selectedVertexOffset != -1) {
+      var newColor = getColor();
+      var j = 0;
+      if (selectedModel.type === MODEL_INPUT_LINE || selectedModel.type === MODEL_INPUT_POLYGON) {
+        for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+          selectedModel.colors[i] = newColor[j];
+          j++;
         }
-        else if (selectedModel.type === MODEL_INPUT_POLYGON) {
-          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-            selectedModel.colors[i] = NEW_COLOR[j];
-            j++;
+      } else if (selectedModel.type === MODEL_INPUT_SQUARE) {
+        for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+          selectedModel.colors[i] = newColor[j];
+          if ((selectedVertexOffset > 4) && (selectedVertexOffset < 10)) {
+            selectedModel.colors[i - 8] = newColor[j];
           }
+          j++;
         }
-        else if (selectedModel.type === MODEL_INPUT_SQUARE) {
-          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-            selectedModel.colors[i] = NEW_COLOR[j];
-            if ((selectedVertexOffset > 4) && (selectedVertexOffset < 10)) {
-              selectedModel.colors[i - 8] = NEW_COLOR[j];
-            }
-            j++;
-          }
-        }
-        setColorBufferData(selectedModel);
       }
+      setColorBufferData(selectedModel);
     }
   }
 
