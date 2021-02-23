@@ -146,7 +146,7 @@ window.onload = function() {
     } else if (modelInput === MODEL_INPUT_SQUARE) {
       drawSquareMouseMoveHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
-      noInputMouseMoveHelper(e);
+      dragVertexMouseMoveHelper(e);
     }
   }
 
@@ -237,10 +237,10 @@ window.onload = function() {
   function drawSquareMouseDownHelper(e) {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
-    const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
+    const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
     var VERTEX_COLOR = getColor();
-    const colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
-    var newModel = new Square(gl.TRIANGLES, vertices, colors);
+    const colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+    var newModel = new Square(gl.TRIANGLE_FAN, vertices, colors);
     models.push(newModel);
   }
 
@@ -267,16 +267,12 @@ window.onload = function() {
         y: origin.y + (sideLength * yDirection)
       };
       // Update model vertices
-      model.vertices[2] = target.x;
-      model.vertices[3] = origin.y;
-      model.vertices[4] = origin.x;
+      model.vertices[2] = origin.x;
+      model.vertices[3] = target.y;
+      model.vertices[4] = target.x;
       model.vertices[5] = target.y;
       model.vertices[6] = target.x;
       model.vertices[7] = origin.y;
-      model.vertices[8] = origin.x;
-      model.vertices[9] = target.y;
-      model.vertices[10] = target.x;
-      model.vertices[11] = target.y;
       // Set buffer data
       setPositionBufferData(model);
     }
@@ -302,7 +298,7 @@ window.onload = function() {
     setPositionBufferData(newModel);
   }
 
-  function noInputMouseMoveHelper(e) {
+  function dragVertexMouseMoveHelper(e) {
     if (isMouseDown) {
       if (draggedVertexOffset != -1) {  // any vertex selected
         if (draggedModel.type === MODEL_INPUT_SQUARE) {
