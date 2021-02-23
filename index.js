@@ -303,36 +303,44 @@ window.onload = function() {
       if (draggedVertexOffset != -1) {  // any vertex selected
         if (draggedModel.type === MODEL_INPUT_SQUARE) {
           const mGlCoord = getMouseGlCoordinate(gl, e);
-          const model = draggedModel[models.length - 1];
+          const vertices = draggedModel.vertices;
+          // Get origin point (opposite to the clicked vertex)
           const origin = {
-            x: draggedModel.vertices[draggedVertexOffset],
-            y: draggedModel.vertices[draggedVertexOffset]
+            x: vertices[(draggedVertexOffset + 4) % 8],
+            y: vertices[(draggedVertexOffset + 5) % 8]
           };
           // Calculate target coordinate (opposite direction with the origin point)
           const sideLength = Math.max(
             Math.abs(mGlCoord.x - origin.x),
             Math.abs(mGlCoord.y - origin.y)
           );
-          const halfSideLength = sideLength / 2;
-          console.log(halfSideLength);
-          const centerX = (draggedModel.vertices[0] + draggedModel.vertices[10]) / 2;
-          const centerY = (draggedModel.vertices[1] + draggedModel.vertices[11]) / 2;
-          const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };  // top left
-          const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };  // bottom right
-          console.log(draggedVertexOffset)
-          // Update model vertices
-          draggedModel.vertices[0] = newOrigin.x;
-          draggedModel.vertices[1] = newOrigin.y;
-          draggedModel.vertices[2] = newTarget.x;
-          draggedModel.vertices[3] = newOrigin.y;
-          draggedModel.vertices[4] = newOrigin.x;
-          draggedModel.vertices[5] = newTarget.y;
-          draggedModel.vertices[6] = newTarget.x;
-          draggedModel.vertices[7] = newOrigin.y;
-          draggedModel.vertices[8] = newOrigin.x;
-          draggedModel.vertices[9] = newTarget.y;
-          draggedModel.vertices[10] = newTarget.x;
-          draggedModel.vertices[11] = newTarget.y;
+          const xDirection = (mGlCoord.x > origin.x) ? 1 : -1; // if true, mouse is in right of origin point
+          const yDirection = (mGlCoord.y > origin.y) ? 1 : -1; // if true, mouse is in above of origin point
+          const target = {
+            x: origin.x + (sideLength * xDirection),
+            y: origin.y + (sideLength * yDirection)
+          };
+          // Update dragged vertex
+          vertices[draggedVertexOffset] = target.x;
+          vertices[draggedVertexOffset + 1] = target.y;
+          //  Update dragged vertex neighbour
+          if (draggedVertexOffset == 0) {
+            // vertex 0 dragged
+            vertices[2] = target.x;
+            vertices[7] = target.y;
+          } else if (draggedVertexOffset == 2) {
+            // vertex 1 dragged
+            vertices[0] = target.x;
+            vertices[5] = target.y;
+          } else if (draggedVertexOffset == 4) {
+            // vertex 2 dragged
+            vertices[6] = target.x;
+            vertices[3] = target.y;
+          } else if (draggedVertexOffset == 6) {
+            // vertex 3 dragged
+            vertices[4] = target.x;
+            vertices[1] = target.y;
+          }
           // Set buffer data
           setPositionBufferData(draggedModel);
         } else {
