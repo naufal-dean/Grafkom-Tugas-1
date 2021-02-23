@@ -327,15 +327,28 @@ window.onload = function() {
   function changeColorMouseMoveHelper() {
     if (!isMouseDown) {
       if (selectedVertexOffset != -1) {  // any vertex selected
-        var VERTEX_COLOR = getColor();
+        var NEW_COLOR = getColor();
+        var j = 0;
         if (selectedModel.type === MODEL_INPUT_LINE) {
-          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR];
+          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+            selectedModel.colors[i] = NEW_COLOR[j];
+            j++;
+          }
         }
         else if (selectedModel.type === MODEL_INPUT_POLYGON) {
-          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+            selectedModel.colors[i] = NEW_COLOR[j];
+            j++;
+          }
         }
         else if (selectedModel.type === MODEL_INPUT_SQUARE) {
-          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
+            selectedModel.colors[i] = NEW_COLOR[j];
+            if ((selectedVertexOffset > 4) && (selectedVertexOffset < 10)) {
+              selectedModel.colors[i - 8] = NEW_COLOR[j];
+            }
+            j++;
+          }
         }
         setColorBufferData(selectedModel);
       }
