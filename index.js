@@ -4,6 +4,7 @@ const MODEL_INPUT_NONE = "none";
 const MODEL_INPUT_LINE = "line";
 const MODEL_INPUT_SQUARE = "square";
 const MODEL_INPUT_POLYGON = "polygon";
+const MODEL_INPUT_COLOR = "color";
 
 window.onload = function() {
   // Get canvas
@@ -88,7 +89,7 @@ window.onload = function() {
     if (!dragged) {
       if (modelInput === MODEL_INPUT_POLYGON) {
         drawPolygonMouseClickHelper(e);
-      } else if (modelInput === MODEL_INPUT_NONE) {
+      } else if (modelInput === MODEL_INPUT_COLOR) {
         [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
       }
     } else {
@@ -106,6 +107,7 @@ window.onload = function() {
     } else if (modelInput === MODEL_INPUT_NONE) {
       [draggedModel, draggedVertexOffset] = getVertexOffset(gl, e, models);
     }
+
   }
 
   function mouseUpHandler(e) {
@@ -138,6 +140,8 @@ window.onload = function() {
       drawSquareMouseMoveHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
       noInputMouseMoveHelper(e);
+    } else if (modelInput === MODEL_INPUT_COLOR) {
+      changeColorMouseMoveHelper();
     }
   }
 
@@ -180,7 +184,8 @@ window.onload = function() {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
     const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
-    var newModel = new Line(gl.LINES, vertices, [...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR]);
+    var VERTEX_COLOR = getColor();
+    var newModel = new Line(gl.LINES, vertices, [...VERTEX_COLOR, ...VERTEX_COLOR]);
     models.push(newModel);
   }
 
@@ -199,7 +204,8 @@ window.onload = function() {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
     const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
-    const colors = [...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR, ...DEFAULT_VERTEX_COLOR];
+    var VERTEX_COLOR = getColor();
+    const colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
     var newModel = new Square(gl.TRIANGLES, vertices, colors);
     models.push(newModel);
   }
@@ -255,7 +261,8 @@ window.onload = function() {
     // Add new vertex
     const mGlCoord = getMouseGlCoordinate(gl, e);
     newModel.vertices.push(mGlCoord.x, mGlCoord.y);
-    newModel.colors.push(...DEFAULT_VERTEX_COLOR);
+    var VERTEX_COLOR = getColor();
+    newModel.colors.push(...VERTEX_COLOR);
     newModel.vertexCount++;
     // Set buffer data
     setPositionBufferData(newModel);
@@ -277,6 +284,23 @@ window.onload = function() {
     }
   }
 
+  function changeColorMouseMoveHelper() {
+    if (!isMouseDown) {
+      if (selectedVertexOffset != -1) {  // any vertex selected
+        var VERTEX_COLOR = getColor();
+        if (selectedModel.type === MODEL_INPUT_LINE) {
+          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR];
+        }
+        else if (selectedModel.type === MODEL_INPUT_POLYGON) {
+          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+        }
+        else if (selectedModel.type === MODEL_INPUT_SQUARE) {
+          selectedModel.colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
+        }
+        setColorBufferData(selectedModel);
+      }
+    }
+  }
 
   // Render helpers
   function setPositionBufferData(model) {
