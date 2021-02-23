@@ -34,24 +34,38 @@
     </canvas>
     <br /><br />
     <!-- Input model radio button -->
-    <p>Select input:</p>
-    <input type="radio" name="model-input" value="drag" checked><span>Drag</span><br />
-    <input type="radio" name="model-input" value="line"><span>Line</span><br />
-    <input type="radio" name="model-input" value="square"><span>Square</span><br />
-    <input type="radio" name="model-input" value="polygon"><span>Polygon</span><br />
-    <!-- Change color -->
-    <input type="radio" name="model-input" value="color"><span>Change Color</span><br />
-    <div class="field">
-      <label for="color-input">Select Color : </label>
-      <input id="color-input" name="color-input" type="color" value="#FFFFFF">
+    <div>
+      <p>Menu:</p>
+      <!-- Drag vertex -->
+      <input type="radio" id="drag" name="model-input" value="drag" checked>
+      <label for="drag">Drag Vertex</label><br />
+      <!-- Draw new line -->
+      <input type="radio" id="line" name="model-input" value="line">
+      <label for="line">Draw Line</label><br />
+      <!-- Draw new square -->
+      <input type="radio" id="square" name="model-input" value="square">
+      <label for="square">Draw Square</label><br />
+      <!-- Draw new polygon -->
+      <input type="radio" id="polygon" name="model-input" value="polygon">
+      <label for="polygon">Draw Polygon</label><br />
+      <!-- Change color -->
+      <input type="radio" id="color" name="model-input" value="color">
+      <label for="color">Change Color</label><br />
+      <div class="field">
+        <label for="change-color-input">Select Color: </label>
+        <input id="change-color-input" name="change-color-input" type="color" value="#FFFFFF">
+      </div>
+      <!-- Change square size -->
+      <input type="radio" id="change-square-size" name="model-input" value="change-square-size">
+      <label for="change-square-size">Change Square Size</label><br />
+      <input type="range" id="square-size-slider" min="0" max="100" value="0"><br />
     </div>
     <br />
-    <!-- Change square size -->
-    <input type="radio" name="model-input" value="change-square-size"><span>Change Square Size</span><br />
-    <input type="range" id="square-size-slider" min="0" max="100" value="0"><br />
     <!-- Save and load button -->
-    <button id="savebtn" type="button" name="savebtn">Save Model</button><br />
-    <input id="loadfile" type="file" /><br />
-    <button id="loadbtn" type="button" name="loadbtn">Load Model</button><br />
+    <div>
+      <button id="savebtn" type="button" name="savebtn">Save Model</button><br /><br />
+      <input id="loadfile" type="file" /><br />
+      <button id="loadbtn" type="button" name="loadbtn">Load Model</button><br />
+    </div>
   </body>
 </html>

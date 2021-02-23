@@ -322,7 +322,7 @@ window.onload = function() {
           const sideLength = Math.max(
             Math.abs(mGlCoord.x - origin.x),
             Math.abs(mGlCoord.y - origin.y)
-          ); 
+          );
           const halfSideLength = sideLength / 2;
           console.log(halfSideLength);
           const centerX = (draggedModel.vertices[0] + draggedModel.vertices[10]) / 2;
