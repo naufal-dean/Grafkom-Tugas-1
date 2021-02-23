@@ -272,7 +272,32 @@ window.onload = function() {
     if (isMouseDown) {
       if (draggedVertexOffset != -1) {  // any vertex selected
         if (draggedModel.type === MODEL_INPUT_SQUARE) {
-          // TODO: implement
+          const mGlCoord = getMouseGlCoordinate(gl, e);
+          const model = draggedModel[models.length - 1];
+          const origin = {
+            x: draggedModel.vertices[0],
+            y: draggedModel.vertices[1]
+          };
+          // Calculate target coordinate (opposite direction with the origin point)
+          const sideLength = Math.max(
+            Math.abs(mGlCoord.x - origin.x),
+            Math.abs(mGlCoord.y - origin.y)
+          );
+          const xDirection = (mGlCoord.x > origin.x) ? 1 : -1; // if true, mouse is in right of origin point
+          const yDirection = (mGlCoord.y > origin.y) ? 1 : -1; // if true, mouse is in above of origin point
+          const target = {
+            x: origin.x + (sideLength * xDirection),
+            y: origin.y + (sideLength * yDirection)
+          };
+          console.log(draggedVertexOffset)
+          // Update model vertices
+          if ((draggedVertexOffset == 0) || (draggedVertexOffset == 10)) {
+            draggedModel.vertices[draggedVertexOffset] = target.x;
+            draggedModel.vertices[draggedVertexOffset + 1] = target.y;
+
+          }
+          // Set buffer data
+          setPositionBufferData(draggedModel);
         } else {
           // Update vertex data
           const mGlCoord = getMouseGlCoordinate(gl, e);
