@@ -120,10 +120,10 @@ function getSquareModelClicked(gl, e, models) {
 
 function squareInRange(mGlCoord, squareModel) {
   // Create square area lower and upper bound
-  const lowerX = Math.min(squareModel.vertices[0], squareModel.vertices[10]);
-  const lowerY = Math.min(squareModel.vertices[1], squareModel.vertices[11]);
-  const upperX = Math.max(squareModel.vertices[0], squareModel.vertices[10]);
-  const upperY = Math.max(squareModel.vertices[1], squareModel.vertices[11]);
+  const lowerX = Math.min(squareModel.vertices[0], squareModel.vertices[4]);
+  const lowerY = Math.min(squareModel.vertices[1], squareModel.vertices[5]);
+  const upperX = Math.max(squareModel.vertices[0], squareModel.vertices[4]);
+  const upperY = Math.max(squareModel.vertices[1], squareModel.vertices[5]);
   // Return true if mouse inside vertex area, otherwise false
   return (
     lowerX < mGlCoord.x && mGlCoord.x < upperX &&

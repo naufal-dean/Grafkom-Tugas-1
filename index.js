@@ -92,13 +92,7 @@ window.onload = function() {
       } else if (modelInput === MODEL_INPUT_COLOR) {
         changeColorMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_CHANGE_SQUARE_SIZE) {
-        selectedSquareModel = getSquareModelClicked(gl, e, models);
-        if (selectedSquareModel !== null) {  // Any square selected
-          const sideLength = Math.abs(selectedSquareModel.vertices[0] - selectedSquareModel.vertices[10]);
-          // Convert length in gl (max 2) to percentage (max 100)
-          const sliderVal = (sideLength * 100) / 2;
-          document.getElementById("square-size-slider").value = String(sliderVal);
-        }
+        changeSquareSizeMouseClickHelper(e);
       }
     } else {
       dragged = false;
@@ -174,27 +168,34 @@ window.onload = function() {
   // Set change square size slider listener
   document.getElementById("square-size-slider").addEventListener("input", function(e) {
     if (selectedSquareModel) {
+      const vertices = selectedSquareModel.vertices;
       // Convert length percentage (max 100) to length in gl (max 2)
-      const sideLength = (this.value * 2) / 100;
+      // Limit min slider value to 1, because when the size is 0, the orientation is ambiguous
+      const sideLength = (Math.max(this.value, 1) * 2) / 100;
       const halfSideLength = sideLength / 2;
       // Get center of the square
-      const centerX = (selectedSquareModel.vertices[0] + selectedSquareModel.vertices[10]) / 2;
-      const centerY = (selectedSquareModel.vertices[1] + selectedSquareModel.vertices[11]) / 2;
-      const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };  // top left
-      const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };  // bottom right
+      const centerX = (vertices[0] + vertices[4]) / 2;
+      const centerY = (vertices[1] + vertices[5]) / 2;
+      // Get new pos for vertex 0 and vertex 2
+      const v2InRightModifier = (vertices[4] > centerX) ? 1 : -1;
+      const v2InTopModifier = (vertices[5] > centerY) ? 1 : -1;
+      const newPosV0 = {
+        x: centerX - (v2InRightModifier * halfSideLength),
+        y: centerY - (v2InTopModifier * halfSideLength)
+      };  // vertex 0
+      const newPosV2 = {
+        x: centerX + (v2InRightModifier * halfSideLength),
+        y: centerY + (v2InTopModifier * halfSideLength)
+      };  // vertex 2
       // Update square size relative to the center
-      selectedSquareModel.vertices[0] = newOrigin.x;
-      selectedSquareModel.vertices[1] = newOrigin.y;
-      selectedSquareModel.vertices[2] = newTarget.x;
-      selectedSquareModel.vertices[3] = newOrigin.y;
-      selectedSquareModel.vertices[4] = newOrigin.x;
-      selectedSquareModel.vertices[5] = newTarget.y;
-      selectedSquareModel.vertices[6] = newTarget.x;
-      selectedSquareModel.vertices[7] = newOrigin.y;
-      selectedSquareModel.vertices[8] = newOrigin.x;
-      selectedSquareModel.vertices[9] = newTarget.y;
-      selectedSquareModel.vertices[10] = newTarget.x;
-      selectedSquareModel.vertices[11] = newTarget.y;
+      vertices[0] = newPosV0.x;
+      vertices[1] = newPosV0.y;
+      vertices[2] = newPosV0.x;
+      vertices[3] = newPosV2.y;
+      vertices[4] = newPosV2.x;
+      vertices[5] = newPosV2.y;
+      vertices[6] = newPosV2.x;
+      vertices[7] = newPosV0.y;
       // Set buffer data
       setPositionBufferData(selectedSquareModel);
     }
@@ -365,6 +366,16 @@ window.onload = function() {
         j++;
       }
       setColorBufferData(clickedModel);
+    }
+  }
+
+  function changeSquareSizeMouseClickHelper(e) {
+    selectedSquareModel = getSquareModelClicked(gl, e, models);
+    if (selectedSquareModel) {  // Any square selected
+      const sideLength = Math.abs(selectedSquareModel.vertices[0] - selectedSquareModel.vertices[4]);
+      // Convert length in gl (max 2) to percentage (max 100)
+      const sliderVal = (sideLength * 100) / 2;
+      document.getElementById("square-size-slider").value = String(sliderVal);
     }
   }
 
