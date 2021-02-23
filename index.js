@@ -5,7 +5,6 @@ const MODEL_INPUT_LINE = "line";
 const MODEL_INPUT_SQUARE = "square";
 const MODEL_INPUT_POLYGON = "polygon";
 const MODEL_INPUT_COLOR = "color";
-const MODEL_INPUT_CHANGE_LINE_SIZE = "change-line-size";
 const MODEL_INPUT_CHANGE_SQUARE_SIZE = "change-square-size";
 
 window.onload = function() {
@@ -21,7 +20,7 @@ window.onload = function() {
 
   // Setup webgl
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0.0, 1.0, 1.0, 1.0);
+  gl.clearColor(...getColor(BG_COLOR_INPUT));
 
   // Create program
   const program = createProgram(gl);
@@ -76,8 +75,6 @@ window.onload = function() {
 
 
   // Set canvas event listener
-  var selectedModel = null;
-  var selectedVertexOffset = -1;
   var draggedModel = null;
   var draggedVertexOffset = -1;
   var selectedSquareModel = null;
@@ -93,25 +90,9 @@ window.onload = function() {
       if (modelInput === MODEL_INPUT_POLYGON) {
         drawPolygonMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_COLOR) {
-        [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
+        changeColorMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_CHANGE_SQUARE_SIZE) {
-        selectedSquareModel = getSquareModelClicked(gl, e, models);
-        if (selectedSquareModel !== null) {  // Any square selected
-          const sideLength = Math.abs(selectedSquareModel.vertices[0] - selectedSquareModel.vertices[10]);
-          // Convert length in gl (max 2) to percentage (max 100)
-          const sliderVal = (sideLength * 100) / 2;
-          document.getElementById("square-size-slider").value = String(sliderVal);
-        }
-      } else if (modelInput === MODEL_INPUT_CHANGE_LINE_SIZE) {
-        selectedLineModel = getLineModelClicked(gl, e, models);
-        if (selectedLineModel !== null) {  // Any line selected
-          xpower = Math.pow((selectedLineModel.vertices[2] - selectedLineModel.vertices[0]), 2);
-          ypower = Math.pow((selectedLineModel.vertices[3] - selectedLineModel.vertices[1]), 2);
-          const sideLength = Math.sqrt(xpower + ypower);
-          // Convert length in gl (max 2) to percentage (max 100)
-          const sliderVal = (sideLength * 100) / 2;
-          document.getElementById("line-size-slider").value = String(sliderVal);
-        }
+        changeSquareSizeMouseClickHelper(e);
       }
     } else {
       dragged = false;
@@ -159,9 +140,7 @@ window.onload = function() {
     } else if (modelInput === MODEL_INPUT_SQUARE) {
       drawSquareMouseMoveHelper(e);
     } else if (modelInput === MODEL_INPUT_NONE) {
-      noInputMouseMoveHelper(e);
-    } else if (modelInput === MODEL_INPUT_COLOR) {
-      changeColorMouseMoveHelper();
+      dragVertexMouseMoveHelper(e);
     }
   }
 
@@ -172,6 +151,11 @@ window.onload = function() {
   canvas.addEventListener("mouseout", mouseOutHandler, false);
   canvas.addEventListener("mousemove", mouseMoveHandler, false);
 
+  // Set general settings input listener
+  document.getElementById("bg-color-input").addEventListener("input", function(e) {
+    gl.clearColor(...getColor(BG_COLOR_INPUT));
+  }, false);
+
   // Set model input radio listener
   const modelInputRadio = document.getElementsByName("model-input");
   for (var i = 0; i < modelInputRadio.length; i++) {
@@ -179,8 +163,6 @@ window.onload = function() {
       if (this.value !== modelInput)
         modelInput = this.value;
       // Reset some variables
-      selectedModel = null;
-      selectedVertexOffset = -1;
       draggedModel = null;
       draggedVertexOffset = -1;
       selectedSquareModel = null;
@@ -188,53 +170,41 @@ window.onload = function() {
     }, false);
   }
 
-  // Set change line size slider listener
-  document.getElementById("line-size-slider").addEventListener("input", function(e) {
-    if (selectedLineModel) {
-      // Convert length percentage (max 100) to length in gl (max 2)
-      const sideLength = (this.value * 2) / 100;
-      const halfSideLength = sideLength / 2;
-      const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };
-      const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };
-      // Update line size
-      selectLineModel.vertices[0] = newOrigin.x;
-      selectLineModel.vertices[1] = newOrigin.y;
-      selectLineModel.vertices[2] = newOrigin.x;
-      selectLineModel.vertices[3] = newOrigin.y;
-      // Set buffer data
-      setPositionBufferData(selectedLineModel);
-    }
-  }, false);
-
   // Set change square size slider listener
   document.getElementById("square-size-slider").addEventListener("input", function(e) {
     if (selectedSquareModel) {
+      const vertices = selectedSquareModel.vertices;
       // Convert length percentage (max 100) to length in gl (max 2)
-      const sideLength = (this.value * 2) / 100;
+      // Limit min slider value to 1, because when the size is 0, the orientation is ambiguous
+      const sideLength = (Math.max(this.value, 1) * 2) / 100;
       const halfSideLength = sideLength / 2;
       // Get center of the square
-      const centerX = (selectedSquareModel.vertices[0] + selectedSquareModel.vertices[10]) / 2;
-      const centerY = (selectedSquareModel.vertices[1] + selectedSquareModel.vertices[11]) / 2;
-      const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };  // top left
-      const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };  // bottom right
+      const centerX = (vertices[0] + vertices[4]) / 2;
+      const centerY = (vertices[1] + vertices[5]) / 2;
+      // Get new pos for vertex 0 and vertex 2
+      const v2InRightModifier = (vertices[4] > centerX) ? 1 : -1;
+      const v2InTopModifier = (vertices[5] > centerY) ? 1 : -1;
+      const newPosV0 = {
+        x: centerX - (v2InRightModifier * halfSideLength),
+        y: centerY - (v2InTopModifier * halfSideLength)
+      };  // vertex 0
+      const newPosV2 = {
+        x: centerX + (v2InRightModifier * halfSideLength),
+        y: centerY + (v2InTopModifier * halfSideLength)
+      };  // vertex 2
       // Update square size relative to the center
-      selectedSquareModel.vertices[0] = newOrigin.x;
-      selectedSquareModel.vertices[1] = newOrigin.y;
-      selectedSquareModel.vertices[2] = newTarget.x;
-      selectedSquareModel.vertices[3] = newOrigin.y;
-      selectedSquareModel.vertices[4] = newOrigin.x;
-      selectedSquareModel.vertices[5] = newTarget.y;
-      selectedSquareModel.vertices[6] = newTarget.x;
-      selectedSquareModel.vertices[7] = newOrigin.y;
-      selectedSquareModel.vertices[8] = newOrigin.x;
-      selectedSquareModel.vertices[9] = newTarget.y;
-      selectedSquareModel.vertices[10] = newTarget.x;
-      selectedSquareModel.vertices[11] = newTarget.y;
+      vertices[0] = newPosV0.x;
+      vertices[1] = newPosV0.y;
+      vertices[2] = newPosV0.x;
+      vertices[3] = newPosV2.y;
+      vertices[4] = newPosV2.x;
+      vertices[5] = newPosV2.y;
+      vertices[6] = newPosV2.x;
+      vertices[7] = newPosV0.y;
       // Set buffer data
       setPositionBufferData(selectedSquareModel);
     }
   }, false);
-
 
   // Set save button listener
   document.getElementById("savebtn").addEventListener("click", function(e) {
@@ -253,8 +223,9 @@ window.onload = function() {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
     const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
-    var VERTEX_COLOR = getColor();
-    var newModel = new Line(gl.LINES, vertices, [...VERTEX_COLOR, ...VERTEX_COLOR]);
+    const defaultColor = getColor(DEFAULT_COLOR_INPUT);
+    const colors = [...defaultColor, ...defaultColor];
+    var newModel = new Line(gl.LINES, vertices, colors);
     models.push(newModel);
   }
 
@@ -272,10 +243,10 @@ window.onload = function() {
   function drawSquareMouseDownHelper(e) {
     // Create new model
     const mGlCoord = getMouseGlCoordinate(gl, e);
-    const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
-    var VERTEX_COLOR = getColor();
-    const colors = [...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR, ...VERTEX_COLOR];
-    var newModel = new Square(gl.TRIANGLES, vertices, colors);
+    const vertices = [mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y, mGlCoord.x, mGlCoord.y];
+    const defaultColor = getColor(DEFAULT_COLOR_INPUT);
+    const colors = [...defaultColor, ...defaultColor, ...defaultColor, ...defaultColor];
+    var newModel = new Square(gl.TRIANGLE_FAN, vertices, colors);
     models.push(newModel);
   }
 
@@ -302,16 +273,12 @@ window.onload = function() {
         y: origin.y + (sideLength * yDirection)
       };
       // Update model vertices
-      model.vertices[2] = target.x;
-      model.vertices[3] = origin.y;
-      model.vertices[4] = origin.x;
+      model.vertices[2] = origin.x;
+      model.vertices[3] = target.y;
+      model.vertices[4] = target.x;
       model.vertices[5] = target.y;
       model.vertices[6] = target.x;
       model.vertices[7] = origin.y;
-      model.vertices[8] = origin.x;
-      model.vertices[9] = target.y;
-      model.vertices[10] = target.x;
-      model.vertices[11] = target.y;
       // Set buffer data
       setPositionBufferData(model);
     }
@@ -330,48 +297,55 @@ window.onload = function() {
     // Add new vertex
     const mGlCoord = getMouseGlCoordinate(gl, e);
     newModel.vertices.push(mGlCoord.x, mGlCoord.y);
-    var VERTEX_COLOR = getColor();
-    newModel.colors.push(...VERTEX_COLOR);
+    newModel.colors.push(...getColor(DEFAULT_COLOR_INPUT));
     newModel.vertexCount++;
     // Set buffer data
     setPositionBufferData(newModel);
   }
 
-  function noInputMouseMoveHelper(e) {
+  function dragVertexMouseMoveHelper(e) {
     if (isMouseDown) {
       if (draggedVertexOffset != -1) {  // any vertex selected
-        if (draggedModel.type === MODEL_INPUT_SQUARE) {
+        if (draggedModel.type === SQUARE_MODEL) {
           const mGlCoord = getMouseGlCoordinate(gl, e);
-          const model = draggedModel[models.length - 1];
+          const vertices = draggedModel.vertices;
+          // Get origin point (opposite to the clicked vertex)
           const origin = {
-            x: draggedModel.vertices[draggedVertexOffset],
-            y: draggedModel.vertices[draggedVertexOffset]
+            x: vertices[(draggedVertexOffset + 4) % 8],
+            y: vertices[(draggedVertexOffset + 5) % 8]
           };
           // Calculate target coordinate (opposite direction with the origin point)
           const sideLength = Math.max(
             Math.abs(mGlCoord.x - origin.x),
             Math.abs(mGlCoord.y - origin.y)
-          ); 
-          const halfSideLength = sideLength / 2;
-          console.log(halfSideLength);
-          const centerX = (draggedModel.vertices[0] + draggedModel.vertices[10]) / 2;
-          const centerY = (draggedModel.vertices[1] + draggedModel.vertices[11]) / 2;
-          const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };  // top left
-          const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };  // bottom right
-          console.log(draggedVertexOffset)
-          // Update model vertices
-          draggedModel.vertices[0] = newOrigin.x;
-          draggedModel.vertices[1] = newOrigin.y;
-          draggedModel.vertices[2] = newTarget.x;
-          draggedModel.vertices[3] = newOrigin.y;
-          draggedModel.vertices[4] = newOrigin.x;
-          draggedModel.vertices[5] = newTarget.y;
-          draggedModel.vertices[6] = newTarget.x;
-          draggedModel.vertices[7] = newOrigin.y;
-          draggedModel.vertices[8] = newOrigin.x;
-          draggedModel.vertices[9] = newTarget.y;
-          draggedModel.vertices[10] = newTarget.x;
-          draggedModel.vertices[11] = newTarget.y;
+          );
+          const xDirection = (mGlCoord.x > origin.x) ? 1 : -1; // if true, mouse is in right of origin point
+          const yDirection = (mGlCoord.y > origin.y) ? 1 : -1; // if true, mouse is in above of origin point
+          const target = {
+            x: origin.x + (sideLength * xDirection),
+            y: origin.y + (sideLength * yDirection)
+          };
+          // Update dragged vertex
+          vertices[draggedVertexOffset] = target.x;
+          vertices[draggedVertexOffset + 1] = target.y;
+          //  Update dragged vertex neighbour
+          if (draggedVertexOffset == 0) {
+            // vertex 0 dragged
+            vertices[2] = target.x;
+            vertices[7] = target.y;
+          } else if (draggedVertexOffset == 2) {
+            // vertex 1 dragged
+            vertices[0] = target.x;
+            vertices[5] = target.y;
+          } else if (draggedVertexOffset == 4) {
+            // vertex 2 dragged
+            vertices[6] = target.x;
+            vertices[3] = target.y;
+          } else if (draggedVertexOffset == 6) {
+            // vertex 3 dragged
+            vertices[4] = target.x;
+            vertices[1] = target.y;
+          }
           // Set buffer data
           setPositionBufferData(draggedModel);
         } else {
@@ -385,34 +359,27 @@ window.onload = function() {
     }
   }
 
-  function changeColorMouseMoveHelper() {
-    if (!isMouseDown) {
-      if (selectedVertexOffset != -1) {  // any vertex selected
-        var NEW_COLOR = getColor();
-        var j = 0;
-        if (selectedModel.type === MODEL_INPUT_LINE) {
-          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-            selectedModel.colors[i] = NEW_COLOR[j];
-            j++;
-          }
-        }
-        else if (selectedModel.type === MODEL_INPUT_POLYGON) {
-          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-            selectedModel.colors[i] = NEW_COLOR[j];
-            j++;
-          }
-        }
-        else if (selectedModel.type === MODEL_INPUT_SQUARE) {
-          for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-            selectedModel.colors[i] = NEW_COLOR[j];
-            if ((selectedVertexOffset > 4) && (selectedVertexOffset < 10)) {
-              selectedModel.colors[i - 8] = NEW_COLOR[j];
-            }
-            j++;
-          }
-        }
-        setColorBufferData(selectedModel);
+  function changeColorMouseClickHelper(e) {
+    const [clickedModel, clickedVertexOffset] = getVertexOffset(gl, e, models);
+    // Change the color of selected vertex
+    if (clickedVertexOffset != -1) {
+      var newColor = getColor(CHANGE_COLOR_INPUT);
+      var j = 0;
+      for (i = (clickedVertexOffset * 2); i < 4 + (clickedVertexOffset * 2); i++) {
+        clickedModel.colors[i] = newColor[j];
+        j++;
       }
+      setColorBufferData(clickedModel);
+    }
+  }
+
+  function changeSquareSizeMouseClickHelper(e) {
+    selectedSquareModel = getSquareModelClicked(gl, e, models);
+    if (selectedSquareModel) {  // Any square selected
+      const sideLength = Math.abs(selectedSquareModel.vertices[0] - selectedSquareModel.vertices[4]);
+      // Convert length in gl (max 2) to percentage (max 100)
+      const sliderVal = (sideLength * 100) / 2;
+      document.getElementById("square-size-slider").value = String(sliderVal);
     }
   }
 

@@ -75,7 +75,7 @@ Line.prototype.constructor = Line;
 
 // Square object
 function Square(drawMode, vertices = [], colors = []) {
-  Model.call(this, drawMode, SQUARE_MODEL, vertices, colors, 6);
+  Model.call(this, drawMode, SQUARE_MODEL, vertices, colors, 4);
 }
 Square.prototype = new Model();
 Square.prototype.constructor = Square;
