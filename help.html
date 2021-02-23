@@ -5,8 +5,8 @@
     <title>WebGL Help</title>
   </head>
   <body>
+    <h1>WebGL Help</h1>
     <div>
-      <h1>WebGL Help</h1>
       <h2>Operasi yang didukung:</h2>
       <ul>
         <li>
@@ -63,6 +63,7 @@
             <li>Klik tombol "Save Model".</li>
             <li>File penyimpanan akan terdownload dengan nama default "model.txt".</li>
           </ol>
+          <p>Sebagai catatan, format penyimpanan model dapat dilihat pada bagian selanjutnya di halaman ini.</p>
         </li>
         <li>
           <h3>Memuat (load) file hasil penyimpanan model</h3>
@@ -72,6 +73,7 @@
             <li>Klik tombol "Load Model" untuk memuat model dari file yang telah dipilih.</li>
             <li>Jika file valid, model akan dimuat ke canvas.</li>
           </ol>
+          <p>Sebagai catatan, format penyimpanan model dapat dilihat pada bagian selanjutnya di halaman ini.</p>
         </li>
         <li>
           <h3>Menggeser titik kontrol dengan mouse</h3>
@@ -118,6 +120,46 @@
           </ol>
         </li>
       </ul>
+    </div>
+    <div>
+      <h2>Format file penyimpanan model:</h2>
+      <div>
+        <p>Format seluruh file:</p>
+        <ul>
+          <li>
+            <code>[Jumlah model yang disimpan (N)]</code><br />
+            <code>[Data model 1]</code><br />
+            <code>[Data model 2]</code><br />
+            <code>[...]</code><br />
+            <code>[Data model N]</code><br />
+          </li>
+        </ul>
+        <p>Format "Data model" yang menyusun seluruh file seperti dituliskan di "Format seluruh file":</p>
+        <ul>
+          <li>
+            <code>[Jumlah line representasi model terkait, termasuk line ini]</code><br />
+            <code>[Konstanta mode draw webgl]</code><br />
+            <code>[Tipe model]</code><br />
+            <code>[Jumlah vertex (X)]</code><br />
+            <code>[Data vertex 1 berupa vec2 yang menyatakan x dan y]</code><br />
+            <code>[Data vertex 2 berupa vec2 yang menyatakan x dan y]</code><br />
+            <code>[...]</code><br />
+            <code>[Data vertex X berupa vec2 yang menyatakan x dan y]</code><br />
+            <code>[Data warna 1 berupa vec4 yang menyatakan r, g, b, dan a]</code><br />
+            <code>[Data warna 2 berupa vec4 yang menyatakan r, g, b, dan a]</code><br />
+            <code>[...]</code><br />
+            <code>[Data warna X berupa vec4 yang menyatakan r, g, b, dan a]</code><br />
+          </li>
+        </ul>
+        <p>Catatan:</p>
+        <ul>
+          <li>Jumlah line representasi model harus sesuai.</li>
+          <li>
+            Pasangan konstanta mode draw webgl dan tipe model yang valid:
+            <code>(1, line), (6, square), (6, polygon)</code>
+          </li>
+        </ul>
+      </div>
     </div>
   </body>
 </html>
