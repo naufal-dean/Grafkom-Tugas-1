@@ -301,7 +301,7 @@ window.onload = function() {
   function dragVertexMouseMoveHelper(e) {
     if (isMouseDown) {
       if (draggedVertexOffset != -1) {  // any vertex selected
-        if (draggedModel.type === MODEL_INPUT_SQUARE) {
+        if (draggedModel.type === SQUARE_MODEL) {
           const mGlCoord = getMouseGlCoordinate(gl, e);
           const vertices = draggedModel.vertices;
           // Get origin point (opposite to the clicked vertex)
@@ -355,26 +355,16 @@ window.onload = function() {
   }
 
   function changeColorMouseClickHelper(e) {
-    const [selectedModel, selectedVertexOffset] = getVertexOffset(gl, e, models);
+    const [clickedModel, clickedVertexOffset] = getVertexOffset(gl, e, models);
     // Change the color of selected vertex
-    if (selectedVertexOffset != -1) {
+    if (clickedVertexOffset != -1) {
       var newColor = getColor();
       var j = 0;
-      if (selectedModel.type === MODEL_INPUT_LINE || selectedModel.type === MODEL_INPUT_POLYGON) {
-        for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-          selectedModel.colors[i] = newColor[j];
-          j++;
-        }
-      } else if (selectedModel.type === MODEL_INPUT_SQUARE) {
-        for (i = (selectedVertexOffset * 2); i < 4 + (selectedVertexOffset * 2); i++) {
-          selectedModel.colors[i] = newColor[j];
-          if ((selectedVertexOffset > 4) && (selectedVertexOffset < 10)) {
-            selectedModel.colors[i - 8] = newColor[j];
-          }
-          j++;
-        }
+      for (i = (clickedVertexOffset * 2); i < 4 + (clickedVertexOffset * 2); i++) {
+        clickedModel.colors[i] = newColor[j];
+        j++;
       }
-      setColorBufferData(selectedModel);
+      setColorBufferData(clickedModel);
     }
   }
 
