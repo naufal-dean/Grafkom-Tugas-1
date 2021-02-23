@@ -315,27 +315,34 @@ window.onload = function() {
           const mGlCoord = getMouseGlCoordinate(gl, e);
           const model = draggedModel[models.length - 1];
           const origin = {
-            x: draggedModel.vertices[0],
-            y: draggedModel.vertices[1]
+            x: draggedModel.vertices[draggedVertexOffset],
+            y: draggedModel.vertices[draggedVertexOffset]
           };
           // Calculate target coordinate (opposite direction with the origin point)
           const sideLength = Math.max(
             Math.abs(mGlCoord.x - origin.x),
             Math.abs(mGlCoord.y - origin.y)
-          );
-          const xDirection = (mGlCoord.x > origin.x) ? 1 : -1; // if true, mouse is in right of origin point
-          const yDirection = (mGlCoord.y > origin.y) ? 1 : -1; // if true, mouse is in above of origin point
-          const target = {
-            x: origin.x + (sideLength * xDirection),
-            y: origin.y + (sideLength * yDirection)
-          };
+          ); 
+          const halfSideLength = sideLength / 2;
+          console.log(halfSideLength);
+          const centerX = (draggedModel.vertices[0] + draggedModel.vertices[10]) / 2;
+          const centerY = (draggedModel.vertices[1] + draggedModel.vertices[11]) / 2;
+          const newOrigin = { x: centerX - halfSideLength, y: centerY + halfSideLength };  // top left
+          const newTarget = { x: centerX + halfSideLength, y: centerY - halfSideLength };  // bottom right
           console.log(draggedVertexOffset)
           // Update model vertices
-          if ((draggedVertexOffset == 0) || (draggedVertexOffset == 10)) {
-            draggedModel.vertices[draggedVertexOffset] = target.x;
-            draggedModel.vertices[draggedVertexOffset + 1] = target.y;
-
-          }
+          draggedModel.vertices[0] = newOrigin.x;
+          draggedModel.vertices[1] = newOrigin.y;
+          draggedModel.vertices[2] = newTarget.x;
+          draggedModel.vertices[3] = newOrigin.y;
+          draggedModel.vertices[4] = newOrigin.x;
+          draggedModel.vertices[5] = newTarget.y;
+          draggedModel.vertices[6] = newTarget.x;
+          draggedModel.vertices[7] = newOrigin.y;
+          draggedModel.vertices[8] = newOrigin.x;
+          draggedModel.vertices[9] = newTarget.y;
+          draggedModel.vertices[10] = newTarget.x;
+          draggedModel.vertices[11] = newTarget.y;
           // Set buffer data
           setPositionBufferData(draggedModel);
         } else {
