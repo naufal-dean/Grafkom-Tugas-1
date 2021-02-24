@@ -188,6 +188,7 @@ window.onload = function() {
       const addedSideLength = (sideLength - curSideLength) / 2;
       // get gradient and constant of line equation
       const gradient = (selectedLineModel.vertices[3] - selectedLineModel.vertices[1]) / (selectedLineModel.vertices[2] - selectedLineModel.vertices[0]);
+      console.log(gradient);
       const constant = selectedLineModel.vertices[1] - (gradient * selectedLineModel.vertices[0]);
       // get maximum and minimum X of the line
       const V0IsUpperX = (vertices[0] > vertices[2]) ? 1 : -1;
@@ -195,13 +196,9 @@ window.onload = function() {
       const addedX = ((xLength * addedSideLength) / sideLength) * V0IsUpperX;
       // update vertice positions
       vertices[0] = vertices[0] + addedX;
-      vertices[1] = (gradient * vertice[0]) + constant;
+      vertices[1] = (gradient * vertices[0]) + constant;
       vertices[2] = vertices[2] - addedX;
-      vertices[3] = (gradient * vertice[0]) + constant;
-      console.log(vertices[0]);
-      console.log(vertices[1]);
-      console.log(vertices[2]);
-      console.log(vertices[3]);
+      vertices[3] = (gradient * vertices[2]) + constant;
       // Set buffer data
       setPositionBufferData(selectedLineModel);
     }
