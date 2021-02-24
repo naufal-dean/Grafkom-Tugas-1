@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>WebGL Help</title>
+  </head>
+  <body>
+    <!-- Help page link -->
+    <a href="index.html">Main Page</a><br /><br />
+    <!-- Help page content -->
+    <h1>WebGL Help</h1>
+    <div>
+      <h2>Operasi yang didukung:</h2>
+      <ul>
+        <li>
+          <h3>Membuat model garis</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Draw Line".</li>
+            <li>Drag pada canvas mulai dari titik A (jangan lepaskan drag terlebih dahulu).</li>
+            <li>
+              Garis yang akan terbentuk dapat dilihat pada canvas. Garis tersebut akan bermula
+              dari titik A dan mengikuti posisi mouse.
+            </li>
+            <li>Lepaskan drag untuk <em>commit</em> proses penggambaran model garis.</li>
+            <li>Ulangi langkah di atas jika ingin menggambar model garis lainnya.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Membuat model persegi</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Draw Square".</li>
+            <li>Drag pada canvas mulai dari titik A (jangan lepaskan drag terlebih dahulu).</li>
+            <li>
+              Persegi yang akan terbentuk dapat dilihat pada canvas dan mengikuti posisi mouse.
+              Titik A akan menjadi titik acuan dari persegi yang akan dibentuk.
+              Panjang sisi persegi bernilai max(delta x dari koordinat titik A dan mouse,
+              delta y dari koordinat titik A dan mouse).
+              Kelakuan ini sama seperti pada CorelDraw jika sedang memasukkan persegi.
+            </li>
+            <li>Lepaskan drag untuk <em>commit</em> proses penggambaran model persegi.</li>
+            <li>Ulangi langkah di atas jika ingin menggambar model persegi lainnya.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Membuat model poligon</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Draw Polygon".</li>
+            <li>Klik pada canvas, titik-titik pada poligon yang diinginkan.</li>
+          </ol>
+          <p>
+            Sebagai catatan model baru akan terlihat di canvas setelah input titik ke-3
+            (saat terbentuk segitiga).
+          </p>
+          <p>
+            Urutan input titik akan mempengaruhi poligon yang dihasilkan (elemen titik
+            digambar menggunakan mode gl.TRIANGLE_FAN).
+          </p>
+        </li>
+        <li>
+          <h3>Menyimpan (save) model ke file</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Klik tombol "Save Model".</li>
+            <li>File penyimpanan akan terdownload dengan nama default "model.txt".</li>
+          </ol>
+          <p>Sebagai catatan, format penyimpanan model dapat dilihat pada bagian selanjutnya di halaman ini.</p>
+        </li>
+        <li>
+          <h3>Memuat (load) file hasil penyimpanan model</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Klik tombol "Choose File" untuk memilih file penyimpanan.</li>
+            <li>Klik tombol "Load Model" untuk memuat model dari file yang telah dipilih.</li>
+            <li>Jika file valid, model akan dimuat ke canvas.</li>
+          </ol>
+          <p>Sebagai catatan, format penyimpanan model dapat dilihat pada bagian selanjutnya di halaman ini.</p>
+        </li>
+        <li>
+          <h3>Menggeser titik kontrol dengan mouse</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Drag Vertex".</li>
+            <li>Drag vertex dari model apapun di canvas.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Mengubah panjang garis</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Drag Vertex".</li>
+            <li>Drag vertex dari model garis yang ingin diubah panjangnya.</li>
+          </ol>
+        </li>
+        <li>
+          <h3>Mengubah ukuran sisi persegi</h3>
+          <p>Langkah-langkah (metode 1):</p>
+          <ol>
+            <li>Pilih menu "Drag Vertex".</li>
+            <li>Drag vertex dari model persegi yang ingin diubah panjangnya.</li>
+          </ol>
+          <p>Langkah-langkah (metode 2):</p>
+          <ol>
+            <li>Pilih menu "Change Square Size".</li>
+            <li>Klik model persegi yang ingin diubah ukurannya.</li>
+            <li>Geser slider yang ada di bawah menu "Change Square Size".</li>
+          </ol>
+          <p>Sebagai catatan, nilai minimum slider dibatasi pada nilai 1.</p>
+          <p>
+            Selain itu, pada saat slider bernilai 100 (max), panjang sisi dari
+            persegi yang dipilih adalah 2 (pada koordinat webgl).
+          </p>
+        </li>
+        <li>
+          <h3>Mengubah warna poligon</h3>
+          <p>Langkah-langkah:</p>
+          <ol>
+            <li>Pilih menu "Change Color".</li>
+            <li>Pilih warna pada color picker berlabel "Select Color".</li>
+            <li>Pada canvas, klik pada vertex dari model apapun yang ingin diubah warnanya.</li>
+          </ol>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2>Format file penyimpanan model:</h2>
+      <div>
+        <p>Format seluruh file:</p>
+        <ul>
+          <li>
+            <code>[Jumlah model yang disimpan (N)]</code><br />
+            <code>[Data model 1]</code><br />
+            <code>[Data model 2]</code><br />
+            <code>[...]</code><br />
+            <code>[Data model N]</code><br />
+          </li>
+        </ul>
+        <p>Format "Data model" yang menyusun seluruh file seperti dituliskan di "Format seluruh file":</p>
+        <ul>
+          <li>
+            <code>[Jumlah line representasi model terkait, termasuk line ini]</code><br />
+            <code>[Konstanta mode draw webgl]</code><br />
+            <code>[Tipe model]</code><br />
+            <code>[Jumlah vertex (X)]</code><br />
+            <code>[Data vertex 1 berupa vec2 yang menyatakan x dan y]</code><br />
+            <code>[Data vertex 2 berupa vec2 yang menyatakan x dan y]</code><br />
+            <code>[...]</code><br />
+            <code>[Data vertex X berupa vec2 yang menyatakan x dan y]</code><br />
+            <code>[Data warna 1 berupa vec4 yang menyatakan r, g, b, dan a]</code><br />
+            <code>[Data warna 2 berupa vec4 yang menyatakan r, g, b, dan a]</code><br />
+            <code>[...]</code><br />
+            <code>[Data warna X berupa vec4 yang menyatakan r, g, b, dan a]</code><br />
+          </li>
+        </ul>
+        <p>Catatan:</p>
+        <ul>
+          <li>Jumlah line representasi model harus sesuai.</li>
+          <li>
+            Pasangan konstanta mode draw webgl dan tipe model yang valid:
+            <code>(1, line), (6, square), (6, polygon)</code>
+          </li>
+          <li>"Background Color" dan "Default Color" tidak termasuk data yang disimpan.</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
