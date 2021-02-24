@@ -31,30 +31,7 @@ window.onload = function() {
   gl.useProgram(program);
 
   // Models array
-  var vertices1 = [
-    0.0, 0.0,
-    0.0, 0.5,
-    0.5, 0.0,
-  ];
-  var colors1 = [
-    1.0, 0.0, 0.0, 1.0,
-    0.0, 1.0, 0.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-  ];
-  var vertices2 = [
-    0.0, 0.0,
-    0.0, -0.5,
-    -0.5, 0.0,
-  ];
-  var colors2 = [
-    1.0, 0.0, 0.0, 1.0,
-    0.0, 1.0, 0.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-  ];
-  var models = [
-    new Polygon(gl.TRIANGLE_FAN, vertices1, colors1, 3),
-    new Polygon(gl.TRIANGLE_FAN, vertices2, colors2, 3)
-  ];
+  var models = [];
 
   // Create position and color buffer
   var positionBuffer = gl.createBuffer();
