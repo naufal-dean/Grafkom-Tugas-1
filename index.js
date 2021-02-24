@@ -6,6 +6,7 @@ const MODEL_INPUT_SQUARE = "square";
 const MODEL_INPUT_POLYGON = "polygon";
 const MODEL_INPUT_COLOR = "color";
 const MODEL_INPUT_CHANGE_SQUARE_SIZE = "change-square-size";
+const MODEL_INPUT_CHANGE_LINE_SIZE = "change-line-size";
 
 window.onload = function() {
   // Get canvas
@@ -78,6 +79,7 @@ window.onload = function() {
   var draggedModel = null;
   var draggedVertexOffset = -1;
   var selectedSquareModel = null;
+  var selectedLineModel = null;
 
   var modelInput = MODEL_INPUT_NONE;
   var isMouseDown = false;
@@ -93,6 +95,8 @@ window.onload = function() {
         changeColorMouseClickHelper(e);
       } else if (modelInput === MODEL_INPUT_CHANGE_SQUARE_SIZE) {
         changeSquareSizeMouseClickHelper(e);
+      } else if (modelInput === MODEL_INPUT_CHANGE_LINE_SIZE) {
+        changeLineSizeMouseClickHelper(e);
       }
     } else {
       dragged = false;
@@ -169,6 +173,39 @@ window.onload = function() {
       polygonModelCreated = false;
     }, false);
   }
+
+    // Set change line size slider listener
+  document.getElementById("line-size-slider").addEventListener("input", function(e) {
+    if (selectedLineModel) {
+      const vertices = selectedLineModel.vertices;
+      // Convert length percentage (max 100) to length in gl (max 2)
+      // Limit min slider value to 1, because when the size is 0, the orientation is ambiguous
+      const sideLength = (Math.max(this.value, 1) * 2) / 100;
+      // get Length
+      const xLength = Math.abs(selectedLineModel.vertices[0] - selectedLineModel.vertices[2]);
+      const yLength = Math.abs(selectedLineModel.vertices[1] - selectedLineModel.vertices[3]);
+      const curSideLength = Math.sqrt(Math.pow(xLength, 2) + Math.pow(yLength, 2));
+      const addedSideLength = (sideLength - curSideLength) / 2;
+      // get gradient and constant of line equation
+      const gradient = (selectedLineModel.vertices[3] - selectedLineModel.vertices[1]) / (selectedLineModel.vertices[2] - selectedLineModel.vertices[0]);
+      const constant = selectedLineModel.vertices[1] - (gradient * selectedLineModel.vertices[0]);
+      // get maximum and minimum X of the line
+      const V0IsUpperX = (vertices[0] > vertices[2]) ? 1 : -1;
+      // get added lengths
+      const addedX = ((xLength * addedSideLength) / sideLength) * V0IsUpperX;
+      // update vertice positions
+      vertices[0] = vertices[0] + addedX;
+      vertices[1] = (gradient * vertice[0]) + constant;
+      vertices[2] = vertices[2] - addedX;
+      vertices[3] = (gradient * vertice[0]) + constant;
+      console.log(vertices[0]);
+      console.log(vertices[1]);
+      console.log(vertices[2]);
+      console.log(vertices[3]);
+      // Set buffer data
+      setPositionBufferData(selectedLineModel);
+    }
+  }, false);
 
   // Set change square size slider listener
   document.getElementById("square-size-slider").addEventListener("input", function(e) {
@@ -380,6 +417,18 @@ window.onload = function() {
       // Convert length in gl (max 2) to percentage (max 100)
       const sliderVal = (sideLength * 100) / 2;
       document.getElementById("square-size-slider").value = String(sliderVal);
+    }
+  }
+
+  function changeLineSizeMouseClickHelper(e) {
+    selectedLineModel = getLineModelClicked(gl, e, models);
+    if (selectedLineModel) {  // Any line selected
+      const xpower = Math.pow((selectedLineModel.vertices[0] - selectedLineModel.vertices[2]), 2);
+      const ypower = Math.pow((selectedLineModel.vertices[1] - selectedLineModel.vertices[3]), 2);
+      const sideLength = Math.sqrt(xpower + ypower);
+      // Convert length in gl (max 2) to percentage (max 100)
+      const sliderVal = (sideLength * 100) / 2;
+      document.getElementById("line-size-slider").value = String(sliderVal);
     }
   }
 

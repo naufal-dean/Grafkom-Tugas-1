@@ -55,7 +55,6 @@ function getShader(gl, type, source) {
  * @getVertexOffset
  * @vertexInRange
  * @getSquareModelClicked
-  * @getLineModelClicked
  */
 
 function getMouseGlCoordinate(gl, e) {
@@ -125,7 +124,7 @@ function getLineModelClicked(gl, e, models) {
   // Iterate from last object
   for (var i = models.length - 1; i >= 0 ; i--) {
     if (models[i].type === LINE_MODEL) {
-      if (squareInRange(mGlCoord, models[i])) {
+      if (lineInRange(mGlCoord, models[i])) {
         return models[i];
       }
     }
@@ -148,14 +147,15 @@ function squareInRange(mGlCoord, squareModel) {
 }
 
 function lineInRange(mGlCoord, lineModel) {
-  // TODO: implement
   const gradient = (lineModel.vertices[3] - lineModel.vertices[1]) / (lineModel.vertices[2] - lineModel.vertices[0]);
   const constant = lineModel.vertices[1] - (gradient * lineModel.vertices[0]);
   const upperX = Math.max(lineModel.vertices[0], lineModel.vertices[2]) + 0.1;
-  const lowerX = Math.min(lineModel.vertices[0], lineModel.vertices[2]) + 0.1;
+  const lowerX = Math.min(lineModel.vertices[0], lineModel.vertices[2]) - 0.1;
+  const upperY = (gradient * mGlCoord.x) + constant + 0.1;
+  const lowerY = (gradient * mGlCoord.x) + constant - 0.1;
   // Return true if mouse inside line area, otherwise false
   return (
-    mGlCoord.x < upperX && mGlCoord.x > lowerX &&
-    ((gradient * mGlCoord.x) + constant + 0.1) > y && ((gradient * mGlCoord.x) + constant - 0.1) < y;
+    lowerX < mGlCoord.x && mGlCoord.x < upperX &&
+    lowerY < mGlCoord.y && mGlCoord.y < upperY
   );
 }
